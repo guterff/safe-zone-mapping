@@ -235,17 +235,29 @@
         .icon-warning { color: #f57c00; }
         .icon-success { color: #4caf50; }
         .icon-error { color: #d32f2f; }
+        .icon-question { color: #1976d2; }
+        
         .modal-title { font-size: 1.4rem; font-weight: bold; margin: 0 0 10px 0; color: #333; }
         .modal-text { font-size: 1rem; color: #555; margin-bottom: 20px; line-height: 1.5; }
+        
+        /* ปุ่มใน Modal */
+        .modal-btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        
         .modal-btn {
             background-color: #1976d2; color: white; border: none; padding: 10px 25px;
-            border-radius: 6px; font-size: 1.1rem; cursor: pointer; width: 100%; transition: 0.2s;
+            border-radius: 6px; font-size: 1.1rem; cursor: pointer; flex: 1; transition: 0.2s;
         }
         .modal-btn:hover { background-color: #1565c0; }
         .btn-red { background-color: #d32f2f; }
         .btn-red:hover { background-color: #b71c1c; }
         .btn-green { background-color: #4caf50; }
         .btn-green:hover { background-color: #388e3c; }
+        .btn-gray { background-color: #757575; }
+        .btn-gray:hover { background-color: #616161; }
     </style>
 </head>
 <body>
@@ -315,7 +327,9 @@
             <div id="modalIcon" class="modal-icon"></div>
             <h2 id="modalTitle" class="modal-title">แจ้งเตือน</h2>
             <p id="modalText" class="modal-text">ข้อความ...</p>
-            <button id="modalBtn" class="modal-btn" onclick="closeModal()">ตกลง</button>
+            <div id="modalBtnGroup" class="modal-btn-group">
+                <!-- ปุ่มจะถูกสร้างจาก JavaScript -->
+            </div>
         </div>
     </div>
 
@@ -341,22 +355,53 @@
         const db = firebase.database();
 
 
-        // --- ฟังก์ชันควบคุม Custom Modal ---
-        function showAlert(type, title, text) {
+        // --- ฟังก์ชันควบคุม Custom Modal (อัปเกรดให้รองรับปุ่มยืนยัน/ยกเลิก) ---
+        function showAlert(type, title, text, onConfirm = null) {
             const modal = document.getElementById('customModal');
             const icon = document.getElementById('modalIcon');
             const modalTitle = document.getElementById('modalTitle');
             const modalText = document.getElementById('modalText');
-            const btn = document.getElementById('modalBtn');
+            const btnGroup = document.getElementById('modalBtnGroup');
 
             modalTitle.innerText = title;
             modalText.innerText = text;
-            btn.className = 'modal-btn';
             
-            if (type === 'warning') { icon.innerHTML = '⚠️'; icon.className = 'modal-icon icon-warning'; btn.classList.add('btn-red'); } 
-            else if (type === 'success') { icon.innerHTML = '✅'; icon.className = 'modal-icon icon-success'; btn.classList.add('btn-green'); } 
-            else if (type === 'error') { icon.innerHTML = '❌'; icon.className = 'modal-icon icon-error'; btn.classList.add('btn-red'); } 
+            // ล้างปุ่มเดิมออกก่อน
+            btnGroup.innerHTML = '';
+            
+            // ตั้งค่า Icon
+            if (type === 'warning') { icon.innerHTML = '⚠️'; icon.className = 'modal-icon icon-warning'; } 
+            else if (type === 'success') { icon.innerHTML = '✅'; icon.className = 'modal-icon icon-success'; } 
+            else if (type === 'error') { icon.innerHTML = '❌'; icon.className = 'modal-icon icon-error'; } 
+            else if (type === 'question') { icon.innerHTML = '❓'; icon.className = 'modal-icon icon-question'; }
             else { icon.innerHTML = 'ℹ️'; icon.className = 'modal-icon'; }
+
+            // ถ้ามีการส่งฟังก์ชัน onConfirm มาด้วย (แสดงว่าเป็นหน้าต่าง ยืนยัน/ยกเลิก)
+            if (onConfirm) {
+                const btnConfirm = document.createElement('button');
+                btnConfirm.className = 'modal-btn btn-red';
+                btnConfirm.innerText = 'ใช่, ลบเลย';
+                btnConfirm.onclick = function() {
+                    closeModal();
+                    onConfirm(); // เรียกใช้งานฟังก์ชันลบ
+                };
+
+                const btnCancel = document.createElement('button');
+                btnCancel.className = 'modal-btn btn-gray';
+                btnCancel.innerText = 'ยกเลิก';
+                btnCancel.onclick = closeModal;
+
+                btnGroup.appendChild(btnCancel);
+                btnGroup.appendChild(btnConfirm);
+            } else {
+                // หน้าต่างแจ้งเตือนปกติ มีปุ่ม "ตกลง" ปุ่มเดียว
+                const btnOk = document.createElement('button');
+                btnOk.className = 'modal-btn ' + (type === 'error' || type === 'warning' ? 'btn-red' : (type === 'success' ? 'btn-green' : ''));
+                btnOk.innerText = 'ตกลง';
+                btnOk.onclick = closeModal;
+                btnGroup.appendChild(btnOk);
+            }
+
             modal.style.display = 'flex';
         }
 
@@ -364,8 +409,7 @@
             document.getElementById('customModal').style.display = 'none';
         }
 
-        // --- สร้าง ID ประจำเครื่องของผู้ใช้ (จำลอง Login) ---
-        // ถ้าเครื่องนี้ยังไม่เคยมี ID ระบบจะสร้างรหัสสุ่มให้ และจำไว้ตลอดไป
+        // --- สร้าง ID ประจำเครื่องของผู้ใช้ ---
         let myDeviceId = localStorage.getItem('safeZoneDeviceId');
         if (!myDeviceId) {
             myDeviceId = 'device_' + Math.random().toString(36).substr(2, 9) + Date.now();
@@ -413,10 +457,9 @@
                     let popupContent = `${badgeHtml}<h3>${pin.title}</h3><p>${pin.detail}</p>`;
                     if(pin.image) popupContent += `<img src="${pin.image}" class="popup-image">`;
                     
-                    // --- เช็คว่าเป็นหมุดของเครื่องนี้สร้างเองไหม ---
-                    // ถ้าใช่ (creatorId ตรงกับ myDeviceId) ให้เพิ่มปุ่มลบ!
+                    // --- เพิ่มปุ่มลบ (เรียกฟังก์ชันยืนยันก่อนลบ) ---
                     if (pin.creatorId === myDeviceId) {
-                        popupContent += `<button class="delete-btn" onclick="deletePin('${key}')">🗑️ ลบหมุดของฉัน</button>`;
+                        popupContent += `<button class="delete-btn" onclick="confirmDeletePin('${key}')">🗑️ ลบหมุดของฉัน</button>`;
                     }
                     
                     const newMarker = L.marker([pin.lat, pin.lng], {icon: markerIcon}).bindPopup(popupContent);
@@ -428,13 +471,15 @@
             document.getElementById('total-pins').innerText = pinCount;
         });
 
-        // --- ฟังก์ชันลบหมุดบน Firebase ---
-        window.deletePin = function(pinKey) {
-            if (confirm('คุณต้องการลบหมุดนี้ใช่หรือไม่?')) {
+        // --- ฟังก์ชันยืนยันก่อนลบหมุด ---
+        window.confirmDeletePin = function(pinKey) {
+            // เรียกใช้ Custom UI Alert แทนการใช้ confirm() ธรรมดา
+            showAlert('question', 'ยืนยันการลบหมุด', 'คุณต้องการลบหมุดจุดเสี่ยงนี้ใช่หรือไม่? ข้อมูลจะถูกลบออกจากระบบทันที', function() {
+                // ถ้ากดยืนยัน จะมาทำตรงนี้
                 db.ref('safeZonePins/' + pinKey).remove()
                     .then(() => showAlert('success', 'ลบสำเร็จ', 'หมุดของคุณถูกลบออกจากระบบแล้ว'))
                     .catch((err) => showAlert('error', 'ลบไม่สำเร็จ', 'เกิดข้อผิดพลาดในการลบข้อมูล'));
-            }
+            });
         };
 
         // -------------------------------------------------------------
@@ -504,7 +549,7 @@
             document.getElementById('dangerImage').value = ''; document.getElementById('riskLevel').value = 'medium';
         }
 
-        // 5. ส่งข้อมูลขึ้น Firebase พร้อมแนบ ID ประจำเครื่อง
+        // 5. ส่งข้อมูลขึ้น Firebase 
         function processAndSavePin() {
             if (!currentLatLng) { showAlert('warning', 'ยังไม่ได้เลือกพิกัด!', 'กรุณาคลิกเลือกตำแหน่งจุดเสี่ยงบนแผนที่ก่อนกดบันทึกข้อมูลครับ'); return; }
             const title = document.getElementById('locationName').value;
@@ -540,7 +585,7 @@
             const newPin = { 
                 lat: currentLatLng.lat, lng: currentLatLng.lng, title: title, detail: detail, 
                 risk: risk, image: imageUrl || null, timestamp: Date.now(),
-                creatorId: myDeviceId // แอบส่งรหัสลับเครื่องตัวเองไปด้วย!
+                creatorId: myDeviceId 
             };
             
             db.ref('safeZonePins').push(newPin)
