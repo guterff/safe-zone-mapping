@@ -126,7 +126,6 @@
             z-index: 1; 
         }
 
-        /* เปิดฟอร์มให้แสดงผลค้างไว้ตลอด (ไม่ใช้ display: none แล้ว) */
         #report-form-container {
             display: block; 
             background: white;
@@ -185,6 +184,20 @@
             border: 1px solid #eee;
         }
         
+        /* ปุ่มลบใน Popup */
+        .delete-btn {
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .delete-btn:hover { background-color: #b71c1c; }
+        
         /* ป้ายแจ้งระดับความเสี่ยง (Badge) */
         .risk-badge {
             display: inline-block;
@@ -211,27 +224,13 @@
             animation: fadeIn 0.2s ease-out;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .modal-box {
-            background: white;
-            padding: 25px 30px;
-            border-radius: 12px;
-            text-align: center;
-            max-width: 400px;
-            width: 80%;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            animation: slideUp 0.3s ease-out;
+            background: white; padding: 25px 30px; border-radius: 12px;
+            text-align: center; max-width: 400px; width: 80%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: slideUp 0.3s ease-out;
         }
-
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .modal-icon { font-size: 3rem; margin-bottom: 15px; }
         .icon-warning { color: #f57c00; }
         .icon-success { color: #4caf50; }
@@ -277,7 +276,6 @@
 
         <div id="map"></div>
 
-        <!-- ฟอร์มแสดงผลค้างไว้ตลอด -->
         <div id="report-form-container">
             <h3 style="margin-top:0; color:#d32f2f;">📝 แจ้งข้อมูลจุดเสี่ยง</h3>
             <p style="font-size: 0.95rem; color: #d32f2f; font-weight: bold;" id="display-latlng">📍 สถานะพิกัด: ยังไม่ได้เลือก (กรุณาคลิกบนแผนที่)</p>
@@ -324,7 +322,25 @@
     <!-- โหลด Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     
+    <!-- โหลด Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
     <script>
+        // --- 1. ตั้งค่าเชื่อมต่อ Firebase ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAKl0r6snz3-QsYJz8_Dj5Ejow5Gi7q9lA",
+            authDomain: "safe-zone-mapping.firebaseapp.com",
+            databaseURL: "https://safe-zone-mapping-default-rtdb.asia-southeast1.firebasedatabase.app", 
+            projectId: "safe-zone-mapping",
+            storageBucket: "safe-zone-mapping.firebasestorage.app",
+            messagingSenderId: "643757597662",
+            appId: "1:643757597662:web:7d7a770dbe82ccce86b34f"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+
         // --- ฟังก์ชันควบคุม Custom Modal ---
         function showAlert(type, title, text) {
             const modal = document.getElementById('customModal');
@@ -337,15 +353,10 @@
             modalText.innerText = text;
             btn.className = 'modal-btn';
             
-            if (type === 'warning') {
-                icon.innerHTML = '⚠️'; icon.className = 'modal-icon icon-warning'; btn.classList.add('btn-red');
-            } else if (type === 'success') {
-                icon.innerHTML = '✅'; icon.className = 'modal-icon icon-success'; btn.classList.add('btn-green');
-            } else if (type === 'error') {
-                icon.innerHTML = '❌'; icon.className = 'modal-icon icon-error'; btn.classList.add('btn-red');
-            } else {
-                icon.innerHTML = 'ℹ️'; icon.className = 'modal-icon';
-            }
+            if (type === 'warning') { icon.innerHTML = '⚠️'; icon.className = 'modal-icon icon-warning'; btn.classList.add('btn-red'); } 
+            else if (type === 'success') { icon.innerHTML = '✅'; icon.className = 'modal-icon icon-success'; btn.classList.add('btn-green'); } 
+            else if (type === 'error') { icon.innerHTML = '❌'; icon.className = 'modal-icon icon-error'; btn.classList.add('btn-red'); } 
+            else { icon.innerHTML = 'ℹ️'; icon.className = 'modal-icon'; }
             modal.style.display = 'flex';
         }
 
@@ -353,27 +364,25 @@
             document.getElementById('customModal').style.display = 'none';
         }
 
-        // 1. ตั้งค่าขอบเขตแผนที่ (อำเภอธัญบุรี)
+        // --- สร้าง ID ประจำเครื่องของผู้ใช้ (จำลอง Login) ---
+        // ถ้าเครื่องนี้ยังไม่เคยมี ID ระบบจะสร้างรหัสสุ่มให้ และจำไว้ตลอดไป
+        let myDeviceId = localStorage.getItem('safeZoneDeviceId');
+        if (!myDeviceId) {
+            myDeviceId = 'device_' + Math.random().toString(36).substr(2, 9) + Date.now();
+            localStorage.setItem('safeZoneDeviceId', myDeviceId);
+        }
+
+        // --- 2. ตั้งค่าขอบเขตแผนที่ ---
         const southWest = L.latLng(13.9400, 100.5800); 
         const northEast = L.latLng(14.0900, 100.9000); 
         const bounds = L.latLngBounds(southWest, northEast);
 
-        const map = L.map('map', {
-            maxBounds: bounds,         
-            maxBoundsViscosity: 1.0,   
-            minZoom: 11                
-        }).setView([14.0366, 100.7300], 12);
-        
+        const map = L.map('map', { maxBounds: bounds, maxBoundsViscosity: 1.0, minZoom: 11 }).setView([14.0366, 100.7300], 12);
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-            maxZoom: 19,
-            attribution: 'Tiles &copy; Esri &mdash; Source: Esri'
+            maxZoom: 19, attribution: 'Tiles &copy; Esri'
         }).addTo(map);
 
-        // 2. ไอคอนหมุด
-        const iconConfig = {
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-        };
+        const iconConfig = { shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41] };
         const icons = {
             'high': L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', ...iconConfig }),
             'medium': L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png', ...iconConfig }),
@@ -381,50 +390,69 @@
         };
         const tempIcon = L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png', ...iconConfig });
 
-        // 3. โหลดข้อมูลจาก LocalStorage
-        let savedPins = JSON.parse(localStorage.getItem('safeZonePins')) || [];
+        // --- 3. ดึงข้อมูลจาก Firebase ---
+        let currentMarkers = []; 
 
-        function renderPins() {
-            savedPins.forEach(pin => {
-                let markerIcon = icons[pin.risk] || icons['high'];
-                let badgeHtml = '';
-                if(pin.risk === 'high') badgeHtml = '<span class="risk-badge risk-high">🔴 ความเสี่ยงสูง</span>';
-                else if(pin.risk === 'medium') badgeHtml = '<span class="risk-badge risk-medium">🟠 ความเสี่ยงปานกลาง</span>';
-                else badgeHtml = '<span class="risk-badge risk-low">🟡 ความเสี่ยงน้อย</span>';
+        db.ref('safeZonePins').on('value', (snapshot) => {
+            currentMarkers.forEach(marker => map.removeLayer(marker));
+            currentMarkers = [];
+            
+            const data = snapshot.val();
+            let pinCount = 0;
 
-                let popupContent = `${badgeHtml}<h3>${pin.title}</h3><p>${pin.detail}</p>`;
-                if(pin.image) {
-                    popupContent += `<img src="${pin.image}" class="popup-image">`;
-                }
-                L.marker([pin.lat, pin.lng], {icon: markerIcon}).addTo(map).bindPopup(popupContent);
-            });
-            document.getElementById('total-pins').innerText = savedPins.length;
-        }
-        renderPins();
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    const pin = data[key];
+                    let markerIcon = icons[pin.risk] || icons['high'];
+                    
+                    let badgeHtml = '';
+                    if(pin.risk === 'high') badgeHtml = '<span class="risk-badge risk-high">🔴 ความเสี่ยงสูง</span>';
+                    else if(pin.risk === 'medium') badgeHtml = '<span class="risk-badge risk-medium">🟠 ความเสี่ยงปานกลาง</span>';
+                    else badgeHtml = '<span class="risk-badge risk-low">🟡 ความเสี่ยงน้อย</span>';
+
+                    let popupContent = `${badgeHtml}<h3>${pin.title}</h3><p>${pin.detail}</p>`;
+                    if(pin.image) popupContent += `<img src="${pin.image}" class="popup-image">`;
+                    
+                    // --- เช็คว่าเป็นหมุดของเครื่องนี้สร้างเองไหม ---
+                    // ถ้าใช่ (creatorId ตรงกับ myDeviceId) ให้เพิ่มปุ่มลบ!
+                    if (pin.creatorId === myDeviceId) {
+                        popupContent += `<button class="delete-btn" onclick="deletePin('${key}')">🗑️ ลบหมุดของฉัน</button>`;
+                    }
+                    
+                    const newMarker = L.marker([pin.lat, pin.lng], {icon: markerIcon}).bindPopup(popupContent);
+                    newMarker.addTo(map);
+                    currentMarkers.push(newMarker);
+                    pinCount++;
+                });
+            }
+            document.getElementById('total-pins').innerText = pinCount;
+        });
+
+        // --- ฟังก์ชันลบหมุดบน Firebase ---
+        window.deletePin = function(pinKey) {
+            if (confirm('คุณต้องการลบหมุดนี้ใช่หรือไม่?')) {
+                db.ref('safeZonePins/' + pinKey).remove()
+                    .then(() => showAlert('success', 'ลบสำเร็จ', 'หมุดของคุณถูกลบออกจากระบบแล้ว'))
+                    .catch((err) => showAlert('error', 'ลบไม่สำเร็จ', 'เกิดข้อผิดพลาดในการลบข้อมูล'));
+            }
+        };
 
         // -------------------------------------------------------------
         // ระบบค้นหาสถานที่
         // -------------------------------------------------------------
         let searchTimeout = null;
         const viewBoxStr = "100.5800,14.0900,100.9000,13.9400"; 
-
         function handleInput(e) {
             clearTimeout(searchTimeout);
             const query = e.target.value;
             const resultsContainer = document.getElementById('searchResults');
-            
-            if (query.length < 3) {
-                resultsContainer.innerHTML = '';
-                return;
-            }
-
+            if (query.length < 3) { resultsContainer.innerHTML = ''; return; }
             searchTimeout = setTimeout(async () => {
                 const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=th&viewbox=${viewBoxStr}&bounded=1&limit=5`;
                 try {
                     const response = await fetch(url);
                     const data = await response.json();
                     resultsContainer.innerHTML = '';
-                    
                     if (data.length > 0) {
                         data.forEach(item => {
                             const div = document.createElement('div');
@@ -436,51 +464,25 @@
                             };
                             resultsContainer.appendChild(div);
                         });
-                    } else {
-                        resultsContainer.innerHTML = '<div style="color:#999; text-align:center;">ไม่พบข้อมูลสถานที่ (ในเขตธัญบุรี)</div>';
-                    }
-                } catch (error) {
-                    console.error("Autocomplete error:", error);
-                }
+                    } else { resultsContainer.innerHTML = '<div style="color:#999; text-align:center;">ไม่พบข้อมูลสถานที่ (ในเขตธัญบุรี)</div>'; }
+                } catch (error) { console.error(error); }
             }, 500);
         }
-
         document.addEventListener("click", function (e) {
-            if (e.target.id !== "searchInput") {
-                document.getElementById('searchResults').innerHTML = '';
-            }
+            if (e.target.id !== "searchInput") document.getElementById('searchResults').innerHTML = '';
         });
-        
-        function handleEnter(e) {
-            if (e.key === 'Enter') { searchLocation(); }
-        }
-
+        function handleEnter(e) { if (e.key === 'Enter') searchLocation(); }
         async function searchLocation() {
             const query = document.getElementById('searchInput').value;
-            if(!query) {
-                showAlert('warning', 'แจ้งเตือน', 'กรุณาพิมพ์ชื่อสถานที่ที่ต้องการค้นหาครับ');
-                return;
-            }
+            if(!query) { showAlert('warning', 'แจ้งเตือน', 'กรุณาพิมพ์ชื่อสถานที่'); return; }
             const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=th&viewbox=${viewBoxStr}&bounded=1&limit=1`;
             try {
-                const btn = document.querySelector('.btn-search');
-                btn.innerText = "กำลังหา...";
-                document.getElementById('searchResults').innerHTML = '';
-                
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if(data.length > 0) {
-                    map.flyTo([data[0].lat, data[0].lon], 16, { animate: true, duration: 1.5 });
-                } else {
-                    showAlert('info', 'ไม่พบสถานที่', 'ไม่พบสถานที่นี้ในเขตอำเภอธัญบุรีครับ ลองเปลี่ยนคำค้นหาดูใหม่');
-                }
+                const btn = document.querySelector('.btn-search'); btn.innerText = "กำลังหา...";
+                const response = await fetch(url); const data = await response.json();
+                if(data.length > 0) map.flyTo([data[0].lat, data[0].lon], 16, { animate: true, duration: 1.5 });
+                else showAlert('info', 'ไม่พบสถานที่', 'ไม่พบสถานที่นี้ในเขตอำเภอธัญบุรีครับ');
                 btn.innerText = "ค้นหา"; 
-            } catch (error) {
-                console.error("Search error:", error);
-                showAlert('error', 'เกิดข้อผิดพลาด', 'เกิดข้อผิดพลาดในการค้นหา ลองใหม่อีกครั้งครับ');
-                document.querySelector('.btn-search').innerText = "ค้นหา";
-            }
+            } catch (error) { showAlert('error', 'ข้อผิดพลาด', 'ลองใหม่อีกครั้ง'); document.querySelector('.btn-search').innerText = "ค้นหา"; }
         }
 
         // 4. การทำงานตอนคลิกแผนที่เพื่อเลือกพิกัด
@@ -490,10 +492,7 @@
         map.on('click', function(e) {
             currentLatLng = e.latlng;
             if (tempMarker) map.removeLayer(tempMarker);
-            
             tempMarker = L.marker(currentLatLng, {icon: tempIcon}).addTo(map); 
-            
-            // อัปเดตข้อความพิกัดบนฟอร์มทันที
             document.getElementById('display-latlng').innerHTML = `📍 พิกัดที่เลือก: <span style="color: #1976d2;">${currentLatLng.lat.toFixed(4)}, ${currentLatLng.lng.toFixed(4)}</span>`;
         });
 
@@ -501,29 +500,22 @@
             if (tempMarker) map.removeLayer(tempMarker);
             currentLatLng = null;
             document.getElementById('display-latlng').innerHTML = `📍 สถานะพิกัด: ยังไม่ได้เลือก (กรุณาคลิกบนแผนที่)`;
-            document.getElementById('locationName').value = '';
-            document.getElementById('dangerDetails').value = '';
-            document.getElementById('dangerImage').value = ''; 
-            document.getElementById('riskLevel').value = 'medium';
+            document.getElementById('locationName').value = ''; document.getElementById('dangerDetails').value = '';
+            document.getElementById('dangerImage').value = ''; document.getElementById('riskLevel').value = 'medium';
         }
 
-        // 5. ระบบประมวลผลรูปภาพและบันทึกข้อมูล
+        // 5. ส่งข้อมูลขึ้น Firebase พร้อมแนบ ID ประจำเครื่อง
         function processAndSavePin() {
-            // เช็คก่อนว่าผู้ใช้คลิกเลือกพิกัดบนแผนที่หรือยัง
-            if (!currentLatLng) {
-                showAlert('warning', 'ยังไม่ได้เลือกพิกัด!', 'กรุณาคลิกเลือกตำแหน่งจุดเสี่ยงบนแผนที่ก่อนกดบันทึกข้อมูลครับ');
-                return;
-            }
-
+            if (!currentLatLng) { showAlert('warning', 'ยังไม่ได้เลือกพิกัด!', 'กรุณาคลิกเลือกตำแหน่งจุดเสี่ยงบนแผนที่ก่อนกดบันทึกข้อมูลครับ'); return; }
             const title = document.getElementById('locationName').value;
             const risk = document.getElementById('riskLevel').value;
             const detail = document.getElementById('dangerDetails').value;
             const imageFile = document.getElementById('dangerImage').files[0];
 
-            if(!title || !detail) {
-                showAlert('warning', 'ข้อมูลไม่ครบ', 'กรุณากรอกชื่อสถานที่และรายละเอียดปัญหาให้ครบถ้วนครับ');
-                return;
-            }
+            if(!title || !detail) { showAlert('warning', 'ข้อมูลไม่ครบ', 'กรุณากรอกชื่อสถานที่และรายละเอียดปัญหาครับ'); return; }
+
+            const btnSave = document.querySelector('button[onclick="processAndSavePin()"]');
+            btnSave.innerText = "กำลังบันทึกข้อมูล..."; btnSave.disabled = true;
 
             if (imageFile) {
                 const reader = new FileReader();
@@ -531,58 +523,36 @@
                     const img = new Image();
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 400; 
-                        const scaleSize = MAX_WIDTH / img.width;
-                        canvas.width = MAX_WIDTH;
-                        canvas.height = img.height * scaleSize;
-                        
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        
-                        const compressedImage = canvas.toDataURL('image/jpeg', 0.7);
-                        saveDataToLocal(title, detail, risk, compressedImage);
+                        const MAX_WIDTH = 400; const scaleSize = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH; canvas.height = img.height * scaleSize;
+                        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        saveDataToFirebase(title, detail, risk, canvas.toDataURL('image/jpeg', 0.6), btnSave);
                     };
                     img.src = event.target.result;
                 };
                 reader.readAsDataURL(imageFile);
             } else {
-                saveDataToLocal(title, detail, risk, null);
+                saveDataToFirebase(title, detail, risk, null, btnSave);
             }
         }
 
-        function saveDataToLocal(title, detail, risk, imageUrl) {
-            const newPin = { lat: currentLatLng.lat, lng: currentLatLng.lng, title: title, detail: detail, risk: risk, image: imageUrl };
-            savedPins.push(newPin);
+        function saveDataToFirebase(title, detail, risk, imageUrl, btnSave) {
+            const newPin = { 
+                lat: currentLatLng.lat, lng: currentLatLng.lng, title: title, detail: detail, 
+                risk: risk, image: imageUrl || null, timestamp: Date.now(),
+                creatorId: myDeviceId // แอบส่งรหัสลับเครื่องตัวเองไปด้วย!
+            };
             
-            try {
-                localStorage.setItem('safeZonePins', JSON.stringify(savedPins));
-            } catch (error) {
-                showAlert('error', 'พื้นที่จัดเก็บเต็ม!', 'ไม่สามารถบันทึกรูปภาพได้ เนื่องจากพื้นที่ความจำเบราว์เซอร์เต็ม แนะนำให้เคลียร์ประวัติการท่องเว็บครับ');
-                savedPins.pop(); 
-                return;
-            }
-
-            if (tempMarker) map.removeLayer(tempMarker);
-            
-            let badgeHtml = '';
-            if(risk === 'high') badgeHtml = '<span class="risk-badge risk-high">🔴 ความเสี่ยงสูง</span>';
-            else if(risk === 'medium') badgeHtml = '<span class="risk-badge risk-medium">🟠 ความเสี่ยงปานกลาง</span>';
-            else badgeHtml = '<span class="risk-badge risk-low">🟡 ความเสี่ยงน้อย</span>';
-
-            let popupContent = `${badgeHtml}<h3>${title}</h3><p>${detail}</p>`;
-            if(imageUrl) {
-                popupContent += `<img src="${imageUrl}" class="popup-image">`;
-            }
-
-            L.marker([currentLatLng.lat, currentLatLng.lng], {icon: icons[risk]}).addTo(map)
-             .bindPopup(popupContent).openPopup();
-
-            document.getElementById('total-pins').innerText = savedPins.length;
-            
-            showAlert('success', 'บันทึกสำเร็จ!', 'ขอบคุณที่ร่วมแจ้งจุดเสี่ยง ข้อมูลและรูปภาพของคุณถูกบันทึกลงแผนเรียบร้อยครับ');
-            
-            // รีเซ็ตฟอร์ม
-            cancelPin();
+            db.ref('safeZonePins').push(newPin)
+                .then(() => {
+                    showAlert('success', 'บันทึกสำเร็จ!', 'หมุดถูกสร้างแล้ว คุณสามารถคลิกที่หมุดเพื่อดูข้อมูลหรือลบได้ครับ');
+                    cancelPin(); 
+                    btnSave.innerText = "📌 ปักหมุดบันทึกข้อมูล"; btnSave.disabled = false;
+                })
+                .catch((error) => {
+                    showAlert('error', 'ข้อผิดพลาด!', 'เชื่อมต่อฐานข้อมูลล้มเหลว');
+                    btnSave.innerText = "📌 ปักหมุดบันทึกข้อมูล"; btnSave.disabled = false;
+                });
         }
     </script>
 </body>
