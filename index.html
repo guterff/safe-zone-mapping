@@ -15,12 +15,23 @@
         p.subtitle { margin: 0.3rem 0 0 0; font-size: 0.95rem; opacity: 0.9; }
         main { max-width: 900px; margin: 15px auto; padding: 0 15px; }
         
-        .stats-panel { display: flex; gap: 15px; margin-bottom: 15px; }
-        .stat-card { flex: 1; background: white; padding: 12px; border-radius: 8px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 3px solid #1976d2; }
-        .stat-card:first-child { border-top-color: #d32f2f; }
-        .stat-number { font-size: 2rem; font-weight: bold; color: #333; margin-top: 5px; }
-        .stat-card:first-child .stat-number { color: #d32f2f; }
-        .stat-card:nth-child(2) .stat-number { color: #1976d2; }
+        /* --- ปรับแต่งแผงสถิติใหม่ แยกตามระดับความเสี่ยง --- */
+        .stats-panel { display: flex; gap: 10px; margin-bottom: 15px; }
+        .stat-card { flex: 1; background: white; padding: 12px 8px; border-radius: 8px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 3px solid #ccc; }
+        .stat-card.high { border-top-color: #d32f2f; }
+        .stat-card.medium { border-top-color: #f57c00; }
+        .stat-card.low { border-top-color: #fbc02d; }
+        .stat-card.total { border-top-color: #1976d2; }
+        
+        .stat-label { font-size: 0.85rem; color: #555; font-weight: bold; }
+        .stat-number { font-size: 1.8rem; font-weight: bold; margin-top: 4px; }
+        .stat-card.high .stat-number { color: #d32f2f; }
+        .stat-card.medium .stat-number { color: #f57c00; }
+        .stat-card.low .stat-number { color: #fbc02d; }
+        .stat-card.total .stat-number { color: #1976d2; }
+
+        /* ตัวนับผู้เข้าชมแบบซ่อนมุมเล็กๆ ไม่ให้เด่น */
+        .visitor-counter-mini { text-align: right; font-size: 0.8rem; color: #777; margin-bottom: 10px; }
         
         .instructions { background: white; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #d32f2f; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-size: 1rem; }
         
@@ -91,15 +102,29 @@
     </header>
 
     <main>
+        <!-- 🔴 แผงสถิติใหม่ แยกตามระดับความเสี่ยง 4 กล่อง 🔴 -->
         <div class="stats-panel">
-            <div class="stat-card">
-                <div style="color: #666; font-size: 0.9rem;">จุดเสี่ยงทั้งหมด</div>
-                <div class="stat-number" id="total-pins">0</div>
+            <div class="stat-card total">
+                <div class="stat-label">ทั้งหมด</div>
+                <div class="stat-number" id="count-total">0</div>
             </div>
-            <div class="stat-card">
-                <div style="color: #666; font-size: 0.9rem;">ผู้เข้าชมเว็บไซต์</div>
-                <div class="stat-number" id="total-visitors">0</div>
+            <div class="stat-card high">
+                <div class="stat-label">🔴 เสี่ยงสูง</div>
+                <div class="stat-number" id="count-high">0</div>
             </div>
+            <div class="stat-card medium">
+                <div class="stat-label">🟠 ปานกลาง</div>
+                <div class="stat-number" id="count-medium">0</div>
+            </div>
+            <div class="stat-card low">
+                <div class="stat-label">🟡 เสี่ยงน้อย</div>
+                <div class="stat-number" id="count-low">0</div>
+            </div>
+        </div>
+
+        <!-- ตัวนับผู้เข้าชมแบบเล็กๆ มุมขวา ไม่เด่น -->
+        <div class="visitor-counter-mini">
+            👥 ผู้เข้าชมเว็บไซต์ทั้งหมด: <span id="total-visitors">0</span> คน
         </div>
 
         <div class="instructions">
@@ -245,7 +270,6 @@
         const map = L.map('map', { maxBounds: L.latLngBounds(L.latLng(13.9400, 100.5800), L.latLng(14.0900, 100.9000)), maxBoundsViscosity: 1.0, minZoom: 11 }).setView([14.0366, 100.7300], 12);
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Tiles &copy; Esri' }).addTo(map);
 
-        // หมุดใช้สีตามระดับความเสี่ยงโดยตรง ไม่พึ่งไฟล์รูปไอคอนภายนอก
         function makeRiskIcon(color) {
             const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="46" viewBox="0 0 32 46"><filter id="s" x="-30%" y="-20%" width="160%" height="160%"><feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#000" flood-opacity=".35"/></filter><path filter="url(#s)" d="M16 1C7.7 1 1 7.7 1 16c0 11 15 29 15 29s15-18 15-29C31 7.7 24.3 1 16 1Z" fill="${color}" stroke="white" stroke-width="1.5"/><circle cx="16" cy="16" r="6.2" fill="white" stroke="rgba(0,0,0,.18)" stroke-width="1"/></svg>`;
             return L.icon({
@@ -256,12 +280,11 @@
             });
         }
         const icons = {
-            'high': makeRiskIcon('#d32f2f'),   // สีแดง = ความเสี่ยงสูง
-            'medium': makeRiskIcon('#f57c00'), // สีส้ม = ความเสี่ยงปานกลาง
-            'low': makeRiskIcon('#fbc02d')     // สีเหลือง = ความเสี่ยงน้อย
+            'high': makeRiskIcon('#d32f2f'),   
+            'medium': makeRiskIcon('#f57c00'), 
+            'low': makeRiskIcon('#fbc02d')     
         };
         
-        // 🔴 ใช้ลิงก์พินสีน้ำเงินที่เสถียร 100% 🔴
         const tempIcon = L.icon({ 
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png', 
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', 
@@ -275,15 +298,32 @@
             currentMarkers.forEach(marker => map.removeLayer(marker));
             currentMarkers = []; globalPinData = snapshot.val() || {};
             
-            let pinCount = 0;
+            let totalCount = 0;
+            let highCount = 0;
+            let mediumCount = 0;
+            let lowCount = 0;
+
             Object.keys(globalPinData).forEach(key => {
                 const pin = globalPinData[key];
                 let markerIcon = icons[pin.risk] || icons['medium'];
+                
+                // นับจำนวนแยกตามระดับความเสี่ยง
+                if (pin.risk === 'high') highCount++;
+                else if (pin.risk === 'medium') mediumCount++;
+                else if (pin.risk === 'low') lowCount++;
+                totalCount++;
+
                 const newMarker = L.marker([pin.lat, pin.lng], {icon: markerIcon});
                 newMarker.on('click', () => openPinDetails(key));
-                newMarker.addTo(map); currentMarkers.push(newMarker); pinCount++;
+                newMarker.addTo(map); 
+                currentMarkers.push(newMarker);
             });
-            document.getElementById('total-pins').innerText = pinCount;
+
+            // อัปเดตตัวเลขแสดงผลบนหน้าจอ
+            document.getElementById('count-total').innerText = totalCount;
+            document.getElementById('count-high').innerText = highCount;
+            document.getElementById('count-medium').innerText = mediumCount;
+            document.getElementById('count-low').innerText = lowCount;
         });
 
         let currentActivePinKey = null; 
