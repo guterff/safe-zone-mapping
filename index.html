@@ -10,52 +10,70 @@
     
     <style>
         body { font-family: 'Sarabun', sans-serif; margin: 0; padding: 0; background-color: #f4f4f9; color: #333; }
-        header { background-color: #d32f2f; color: white; text-align: center; padding: 1.5rem 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { margin: 0; font-size: 1.8rem; }
-        p.subtitle { margin: 0.5rem 0 0 0; font-size: 1rem; opacity: 0.9; }
-        main { max-width: 900px; margin: 20px auto; padding: 0 15px; }
+        header { background-color: #d32f2f; color: white; text-align: center; padding: 1.2rem 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { margin: 0; font-size: 1.6rem; }
+        p.subtitle { margin: 0.3rem 0 0 0; font-size: 0.95rem; opacity: 0.9; }
+        main { max-width: 900px; margin: 15px auto; padding: 0 15px; }
         
-        /* --- กล่องสถิติ (อัปเดตมี 2 กล่องแล้ว) --- */
-        .stats-panel { display: flex; gap: 15px; margin-bottom: 20px; }
-        .stat-card { flex: 1; background: white; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 3px solid #1976d2; }
+        .stats-panel { display: flex; gap: 15px; margin-bottom: 15px; }
+        .stat-card { flex: 1; background: white; padding: 12px; border-radius: 8px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 3px solid #1976d2; }
         .stat-card:first-child { border-top-color: #d32f2f; }
-        .stat-number { font-size: 2.5rem; font-weight: bold; color: #333; margin-top: 10px; }
+        .stat-number { font-size: 2rem; font-weight: bold; color: #333; margin-top: 5px; }
         .stat-card:first-child .stat-number { color: #d32f2f; }
         .stat-card:nth-child(2) .stat-number { color: #1976d2; }
         
-        .instructions { background: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #d32f2f; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-size: 1.1rem; }
+        .instructions { background: white; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #d32f2f; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-size: 1rem; }
+        
         .search-container { position: relative; display: flex; gap: 10px; margin-bottom: 15px; }
-        .search-container input { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 1.05rem; }
+        .search-container input { flex: 1; padding: 10px 12px; border: 2px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 1rem; }
         .search-container input:focus { border-color: #d32f2f; outline: none; }
         .search-container button.btn-search { background-color: #1976d2; }
         .autocomplete-items { position: absolute; top: 100%; left: 0; right: 80px; border: 1px solid #d4d4d4; border-top: none; z-index: 999; background-color: #fff; max-height: 250px; overflow-y: auto; border-radius: 0 0 6px 6px; }
-        .autocomplete-items div { padding: 12px; cursor: pointer; border-bottom: 1px solid #eee; }
+        .autocomplete-items div { padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 0.95rem; }
         .autocomplete-items div:hover { background-color: #f1f1f1; }
-        #map { height: 450px; width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-bottom: 20px; border: 2px solid #ddd; z-index: 1; }
+        
+        #map { height: 500px; width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-bottom: 15px; border: 2px solid #ddd; z-index: 1; }
 
-        #report-form-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 20px; border-top: 4px solid #d32f2f; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input[type="text"], .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: inherit; font-size: 1rem; }
-        .form-group input[type="file"] { width: 100%; padding: 8px; border: 1px dashed #d32f2f; border-radius: 4px; background-color: #fafafa; cursor: pointer; }
-        button { background-color: #d32f2f; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 1rem; font-family: inherit; font-weight: bold; transition: 0.3s; }
+        /* 🔴 ปุ่มลอยสำหรับเปิดฟอร์มแจ้งเหตุ (FAB) 🔴 */
+        .fab-btn {
+            position: fixed; bottom: 25px; right: 25px; background-color: #d32f2f; color: white;
+            border: none; border-radius: 30px; padding: 12px 22px; font-size: 1.05rem; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(211,47,47,0.4); cursor: pointer; z-index: 1500; display: flex; align-items: center; gap: 8px;
+            transition: 0.3s; font-family: 'Sarabun', sans-serif;
+        }
+        .fab-btn:hover { background-color: #b71c1c; transform: scale(1.05); }
+
+        /* 🔴 Modal สำหรับฟอร์มปักหมุด (ซ่อนไว้ก่อน กดปุ่มลอยถึงจะเด้ง) 🔴 */
+        .form-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: 2500; align-items: center; justify-content: center; padding: 15px; animation: fadeIn 0.2s ease-out; }
+        .form-modal-box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative; animation: slideUp 0.3s ease-out; }
+        
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.95rem; }
+        .form-group input[type="text"], .form-group textarea, .form-group select { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: inherit; font-size: 0.95rem; }
+        .form-group input[type="file"] { width: 100%; padding: 6px; border: 1px dashed #d32f2f; border-radius: 4px; background-color: #fafafa; cursor: pointer; }
+        
+        button { background-color: #d32f2f; color: white; border: none; padding: 9px 18px; border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-family: inherit; font-weight: bold; transition: 0.3s; }
         button:hover { background-color: #b71c1c; }
-        button.cancel { background-color: #757575; margin-left: 10px; }
+        button.cancel { background-color: #757575; margin-left: 8px; }
+
         .risk-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; color: white; font-size: 0.9rem; font-weight: bold; }
         .risk-high { background-color: #d32f2f; } .risk-medium { background-color: #f57c00; } .risk-low { background-color: #fbc02d; color: #333; } 
 
-        .pin-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: 2000; align-items: center; justify-content: center; animation: fadeIn 0.2s ease-out; padding: 15px; }
+        /* Modal ดูรายละเอียดหมุด & คอมเมนต์ */
+        .pin-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: 2000; align-items: center; justify-content: center; padding: 15px; animation: fadeIn 0.2s ease-out; }
         .pin-modal-box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative; animation: slideUp 0.3s ease-out; }
         .close-btn { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5rem; color: #888; cursor: pointer; padding: 0; }
-        .pin-img-preview { width: 100%; max-height: 250px; object-fit: cover; border-radius: 8px; margin: 15px 0; border: 1px solid #ddd; }
-        .comment-section { background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin-top: 15px; border: 1px solid #eee; }
-        .comment-list { max-height: 200px; overflow-y: auto; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .comment-item { background: white; padding: 10px; border-radius: 8px; border-left: 4px solid #1976d2; font-size: 0.95rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .comment-time { font-size: 0.75rem; color: #888; display: block; margin-bottom: 3px; }
-        .comment-input-group { display: flex; gap: 10px; }
-        .comment-input-group input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; }
-        .comment-input-group button { background-color: #1976d2; padding: 10px 15px; }
+        .pin-img-preview { width: 100%; max-height: 220px; object-fit: cover; border-radius: 8px; margin: 12px 0; border: 1px solid #ddd; }
+        
+        .comment-section { background-color: #f9f9f9; padding: 12px; border-radius: 8px; margin-top: 12px; border: 1px solid #eee; }
+        .comment-list { max-height: 180px; overflow-y: auto; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .comment-item { background: white; padding: 8px 10px; border-radius: 6px; border-left: 4px solid #1976d2; font-size: 0.9rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .comment-time { font-size: 0.75rem; color: #888; display: block; margin-bottom: 2px; }
+        .comment-input-group { display: flex; gap: 8px; }
+        .comment-input-group input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 0.9rem; }
+        .comment-input-group button { background-color: #1976d2; padding: 8px 12px; }
 
+        /* Custom Alert Modal */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 3000; align-items: center; justify-content: center; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -65,33 +83,32 @@
         .modal-title { font-size: 1.4rem; font-weight: bold; margin: 0 0 10px 0; color: #333; }
         .modal-text { font-size: 1rem; color: #555; margin-bottom: 20px; line-height: 1.5; }
         .modal-btn-group { display: flex; gap: 10px; justify-content: center; }
-        .modal-btn { background-color: #1976d2; color: white; border: none; padding: 10px 25px; border-radius: 6px; font-size: 1.1rem; cursor: pointer; flex: 1; transition: 0.2s; }
+        .modal-btn { background-color: #1976d2; color: white; border: none; padding: 10px 25px; border-radius: 6px; font-size: 1.1rem; cursor: pointer; flex: 1; }
         .btn-red { background-color: #d32f2f; } .btn-gray { background-color: #757575; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>📍 ปักหมุดจุดเสี่ยง (Safe Zone Mapping)</h1>
+        <h1>📍 แผนที่จุดเฝ้าระวังภัย (Safe Zone Mapping)</h1>
         <p class="subtitle">สื่อสารกับสังคม - อำเภอธัญบุรี</p>
     </header>
 
     <main>
         <div class="stats-panel">
             <div class="stat-card">
-                <div style="color: #666; font-size: 0.95rem;">จุดเสี่ยงที่รับแจ้งทั้งหมด</div>
+                <div style="color: #666; font-size: 0.9rem;">จุดเสี่ยงทั้งหมด</div>
                 <div class="stat-number" id="total-pins">0</div>
             </div>
-            <!-- 🔴 เพิ่มกล่องตัวนับจำนวนผู้เข้าชม 🔴 -->
             <div class="stat-card">
-                <div style="color: #666; font-size: 0.95rem;">ผู้เข้าชมเว็บไซต์ทั้งหมด</div>
+                <div style="color: #666; font-size: 0.9rem;">ผู้เข้าชมเว็บไซต์</div>
                 <div class="stat-number" id="total-visitors">0</div>
             </div>
         </div>
 
         <div class="instructions">
-            <strong>📢 วิธีร่วมกิจกรรม:</strong> 
-            ค้นหาสถานที่ หรือ <b>คลิกบนแผนที่ด้านล่าง</b> เพื่อเลือกพิกัดจุดเสี่ยง จากนั้นกรอกข้อมูลในฟอร์มแล้วกดบันทึกได้เลย!
+            <strong>📢 คำแนะนำการใช้งาน:</strong> 
+            เลื่อนดูแผนที่และคลิกที่หมุดเพื่อตรวจสอบจุดเสี่ยง หรือกดปุ่ม <b>"➕ แจ้งจุดเสี่ยง"</b> ที่มุมขวาล่างเพื่อรายงานเหตุ
         </div>
 
         <div class="search-container">
@@ -101,10 +118,17 @@
         </div>
 
         <div id="map"></div>
+    </main>
 
-        <div id="report-form-container">
-            <h3 style="margin-top:0; color:#d32f2f;">📝 แจ้งข้อมูลจุดเสี่ยง</h3>
-            <p style="font-size: 0.95rem; color: #d32f2f; font-weight: bold;" id="display-latlng">📍 สถานะพิกัด: ยังไม่ได้เลือก (กรุณาคลิกบนแผนที่)</p>
+    <!-- 🔴 ปุ่มลอยเปิดฟอร์มแจ้งจุดเสี่ยง (FAB) 🔴 -->
+    <button class="fab-btn" onclick="openFormModal()">➕ แจ้งจุดเสี่ยง</button>
+
+    <!-- 🔴 Modal ฟอร์มกรอกข้อมูลแจ้งจุดเสี่ยง 🔴 -->
+    <div id="formModal" class="form-modal-overlay">
+        <div class="form-modal-box">
+            <button class="close-btn" onclick="closeFormModal()">✖</button>
+            <h3 style="margin-top:0; color:#d32f2f;">📝 รายงานข้อมูลจุดเสี่ยง</h3>
+            <p style="font-size: 0.9rem; color: #d32f2f; font-weight: bold;" id="display-latlng">📍 สถานะพิกัด: ยังไม่ได้เลือก (กรุณาคลิกบนแผนที่ก่อน)</p>
             
             <div class="form-group">
                 <label for="locationName">ชื่อสถานที่ / จุดสังเกต</label>
@@ -122,7 +146,7 @@
             
             <div class="form-group">
                 <label for="dangerDetails">รายละเอียดปัญหา</label>
-                <textarea id="dangerDetails" rows="3" placeholder="เช่น เกิดอุบัติเหตุบ่อยครั้ง,ไฟไม่สว่างเป็นพื้นที่เปลี่ยว"></textarea>
+                <textarea id="dangerDetails" rows="3" placeholder="เช่น ไฟถนนเสีย ชอบมีคนเมาขับรถเร็ว"></textarea>
             </div>
 
             <div class="form-group">
@@ -130,23 +154,25 @@
                 <input type="file" id="dangerImage" accept="image/*">
             </div>
             
-            <button onclick="processAndSavePin()">📌 ปักหมุดบันทึกข้อมูล</button>
-            <button class="cancel" onclick="cancelPin()">ล้างข้อมูล</button>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button onclick="processAndSavePin()" style="flex: 1;">📌 บันทึกพิกัด</button>
+                <button class="cancel" onclick="cancelPin()" style="flex: 1;">ล้างข้อมูล</button>
+            </div>
         </div>
-    </main>
+    </div>
 
-    <!-- UI หน้าต่างดูรายละเอียดหมุด -->
+    <!-- UI หน้าต่างดูรายละเอียดหมุด & คอมเมนต์ -->
     <div id="pinDetailsModal" class="pin-modal-overlay">
         <div class="pin-modal-box">
             <button class="close-btn" onclick="closePinDetails()">✖</button>
             <div id="pd-badge"></div>
-            <h2 id="pd-title" style="margin: 10px 0 5px 0; color: #333;"></h2>
-            <p id="pd-detail" style="color: #555; margin-top: 0; line-height: 1.5;"></p>
+            <h2 id="pd-title" style="margin: 10px 0 5px 0; color: #333; font-size: 1.3rem;"></h2>
+            <p id="pd-detail" style="color: #555; margin-top: 0; line-height: 1.4; font-size: 0.95rem;"></p>
             <img id="pd-img" class="pin-img-preview" src="" style="display: none;">
             <div id="pd-delete-container"></div>
             
             <div class="comment-section">
-                <h4 style="margin: 0 0 10px 0; color: #1976d2;">💬 อัปเดตสถานการณ์ / คอมเมนต์</h4>
+                <h4 style="margin: 0 0 8px 0; color: #1976d2; font-size: 0.95rem;">💬 อัปเดตสถานการณ์ / คอมเมนต์</h4>
                 <div id="pd-comment-list" class="comment-list"></div>
                 <div class="comment-input-group">
                     <input type="text" id="pd-comment-input" placeholder="พิมพ์คอมเมนต์..." onkeypress="handleCommentEnter(event)">
@@ -189,20 +215,20 @@
             localStorage.setItem('safeZoneDeviceId', myDeviceId);
         }
 
-        // 🔴 1. ระบบบันทึกและนับจำนวนผู้เข้าชมแบบ Real-time 🔴
-        // เมื่อเปิดเว็บปุ๊บ จะส่ง ID ตัวเองไปเช็คชื่อที่ฐานข้อมูลทันที
         db.ref('visitors/' + myDeviceId).set({ lastActive: Date.now() });
-
-        // รอรับยอดรวมผู้เข้าชมเพื่อเอามาแสดงผล
         db.ref('visitors').on('value', (snapshot) => {
             const data = snapshot.val();
-            // นับว่ามีกี่เครื่อง (กี่ ID) ที่เคยเข้าเว็บนี้
-            const visitorCount = data ? Object.keys(data).length : 0;
-            // อัปเดตตัวเลขบนหน้าจอ (ใส่ลูกเล่นแอนิเมชันนิดหน่อยให้ดูสมูท)
-            document.getElementById('total-visitors').innerText = visitorCount;
+            document.getElementById('total-visitors').innerText = data ? Object.keys(data).length : 0;
         });
 
-        // --- ฟังก์ชัน Custom Modal แจ้งเตือน ---
+        // ควบคุม Modal ฟอร์มแจ้งเหตุ
+        function openFormModal() {
+            document.getElementById('formModal').style.display = 'flex';
+        }
+        function closeFormModal() {
+            document.getElementById('formModal').style.display = 'none';
+        }
+
         function showAlert(type, title, text, onConfirm = null) {
             const modal = document.getElementById('customModal'); const icon = document.getElementById('modalIcon');
             const modalTitle = document.getElementById('modalTitle'); const modalText = document.getElementById('modalText');
@@ -239,7 +265,6 @@
         };
         const tempIcon = L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41] });
 
-        // --- ดึงข้อมูลจาก Firebase & นำมาวาดลงแผนที่ ---
         let currentMarkers = []; let globalPinData = {}; 
 
         db.ref('safeZonePins').on('value', (snapshot) => {
@@ -274,7 +299,7 @@
             if (pin.image) { imgEl.src = pin.image; imgEl.style.display = 'block'; } else { imgEl.style.display = 'none'; }
             
             const delContainer = document.getElementById('pd-delete-container');
-            if (pin.creatorId === myDeviceId) { delContainer.innerHTML = `<button style="width:100%; background-color:#d32f2f;" onclick="confirmDeletePin('${pinKey}')">🗑️ ลบหมุดของฉัน</button>`; } else { delContainer.innerHTML = ''; }
+            if (pin.creatorId === myDeviceId) { delContainer.innerHTML = `<button style="width:100%; background-color:#d32f2f; margin-top:10px;" onclick="confirmDeletePin('${pinKey}')">🗑️ ลบหมุดของฉัน</button>`; } else { delContainer.innerHTML = ''; }
             db.ref(`safeZonePins/${pinKey}/comments`).on('value', renderComments);
             document.getElementById('pinDetailsModal').style.display = 'flex';
         }
@@ -295,11 +320,10 @@
                     listEl.appendChild(div);
                 });
                 listEl.scrollTop = listEl.scrollHeight;
-            } else { listEl.innerHTML = '<div style="text-align:center; color:#999; font-size:0.9rem; margin-top:20px;">ยังไม่มีคอมเมนต์ เป็นคนแรกที่อัปเดตสิ!</div>'; }
+            } else { listEl.innerHTML = '<div style="text-align:center; color:#999; font-size:0.85rem; margin-top:10px;">ยังไม่มีคอมเมนต์ เป็นคนแรกที่อัปเดตสิ!</div>'; }
         }
 
         function handleCommentEnter(e) { if (e.key === 'Enter') submitComment(); }
-        
         function submitComment() {
             const inputEl = document.getElementById('pd-comment-input'); const text = inputEl.value.trim();
             if (!text || !currentActivePinKey) return;
@@ -313,7 +337,6 @@
             });
         };
 
-        // --- ระบบค้นหา ---
         let searchTimeout = null; const viewBoxStr = "100.5800,14.0900,100.9000,13.9400"; 
         function handleInput(e) {
             clearTimeout(searchTimeout); const q = e.target.value; const res = document.getElementById('searchResults');
@@ -340,7 +363,6 @@
             } catch(e){} btn.innerText = "ค้นหา"; 
         }
 
-        // --- คลิกแผนที่เพื่อเลือกพิกัด ---
         let tempMarker = null; let currentLatLng = null;
         map.on('click', function(e) {
             currentLatLng = e.latlng;
@@ -351,18 +373,17 @@
 
         function cancelPin() {
             if (tempMarker) map.removeLayer(tempMarker); currentLatLng = null;
-            document.getElementById('display-latlng').innerHTML = `📍 สถานะพิกัด: ยังไม่ได้เลือก (กรุณาคลิกบนแผนที่)`;
+            document.getElementById('display-latlng').innerHTML = `📍 สถานะพิกัด: ยังไม่ได้เลือก (กรุณาคลิกบนแผนที่ก่อน)`;
             document.getElementById('locationName').value = ''; document.getElementById('dangerDetails').value = '';
             document.getElementById('dangerImage').value = ''; document.getElementById('riskLevel').value = 'medium';
         }
 
-        // --- ส่งข้อมูลหมุดขึ้น Firebase ---
         function processAndSavePin() {
-            if (!currentLatLng) return showAlert('warning', 'ยังไม่ได้เลือกพิกัด!', 'กรุณาคลิกบนแผนที่ก่อนครับ');
+            if (!currentLatLng) return showAlert('warning', 'ยังไม่ได้เลือกพิกัด!', 'กรุณาคลิกบนแผนที่เพื่อเลือกตำแหน่งก่อนครับ');
             const title = document.getElementById('locationName').value; const risk = document.getElementById('riskLevel').value;
             const detail = document.getElementById('dangerDetails').value; const imageFile = document.getElementById('dangerImage').files[0];
 
-            if(!title || !detail) return showAlert('warning', 'ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบครับ');
+            if(!title || !detail) return showAlert('warning', 'ข้อมูลไม่ครบ', 'กรุณากรอกชื่อสถานที่และรายละเอียดครับ');
             const btnSave = document.querySelector('button[onclick="processAndSavePin()"]'); btnSave.innerText = "กำลังบันทึก..."; btnSave.disabled = true;
 
             if (imageFile) {
@@ -379,8 +400,18 @@
 
         function saveDataToFirebase(title, detail, risk, imageUrl, btnSave) {
             db.ref('safeZonePins').push({ lat: currentLatLng.lat, lng: currentLatLng.lng, title: title, detail: detail, risk: risk, image: imageUrl || null, timestamp: Date.now(), creatorId: myDeviceId })
-                .then(() => { showAlert('success', 'บันทึกสำเร็จ!', 'สร้างหมุดเรียบร้อย คลิกที่หมุดเพื่อดูข้อมูลได้เลย'); cancelPin(); btnSave.innerText = "📌 ปักหมุดบันทึกข้อมูล"; btnSave.disabled = false; })
-                .catch(() => { showAlert('error', 'ข้อผิดพลาด!', 'เชื่อมต่อฐานข้อมูลล้มเหลว'); btnSave.innerText = "📌 ปักหมุดบันทึกข้อมูล"; btnSave.disabled = false; });
+                .then(() => { 
+                    closeFormModal(); 
+                    showAlert('success', 'บันทึกสำเร็จ!', 'สร้างจุดเสี่ยงเรียบร้อยแล้ว'); 
+                    cancelPin(); 
+                    btnSave.innerText = "📌 บันทึกพิกัด"; 
+                    btnSave.disabled = false; 
+                })
+                .catch(() => { 
+                    showAlert('error', 'ข้อผิดพลาด!', 'เชื่อมต่อฐานข้อมูลล้มเหลว'); 
+                    btnSave.innerText = "📌 บันทึกพิกัด"; 
+                    btnSave.disabled = false; 
+                });
         }
     </script>
 </body>
