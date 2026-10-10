@@ -15,7 +15,6 @@
         p.subtitle { margin: 0.3rem 0 0 0; font-size: 0.95rem; opacity: 0.9; }
         main { max-width: 900px; margin: 15px auto; padding: 0 15px; }
         
-        /* --- ปรับแต่งแผงสถิติใหม่ แยกตามระดับความเสี่ยง --- */
         .stats-panel { display: flex; gap: 10px; margin-bottom: 15px; }
         .stat-card { flex: 1; background: white; padding: 12px 8px; border-radius: 8px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 3px solid #ccc; }
         .stat-card.high { border-top-color: #d32f2f; }
@@ -30,9 +29,7 @@
         .stat-card.low .stat-number { color: #fbc02d; }
         .stat-card.total .stat-number { color: #1976d2; }
 
-        /* ตัวนับผู้เข้าชมแบบซ่อนมุมเล็กๆ ไม่ให้เด่น */
         .visitor-counter-mini { text-align: right; font-size: 0.8rem; color: #777; margin-bottom: 10px; }
-        
         .instructions { background: white; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #d32f2f; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-size: 1rem; }
         
         .search-container { position: relative; display: flex; gap: 10px; margin-bottom: 15px; }
@@ -53,8 +50,8 @@
         }
         .fab-btn:hover { background-color: #b71c1c; transform: scale(1.05); }
 
-        .form-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: 2500; align-items: center; justify-content: center; padding: 15px; animation: fadeIn 0.2s ease-out; }
-        .form-modal-box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative; animation: slideUp 0.3s ease-out; }
+        .form-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: 2500; align-items: center; justify-content: center; padding: 15px; }
+        .form-modal-box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative; }
         
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.95rem; }
@@ -68,8 +65,8 @@
         .risk-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; color: white; font-size: 0.9rem; font-weight: bold; }
         .risk-high { background-color: #d32f2f; } .risk-medium { background-color: #f57c00; } .risk-low { background-color: #fbc02d; color: #333; } 
 
-        .pin-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: 2000; align-items: center; justify-content: center; padding: 15px; animation: fadeIn 0.2s ease-out; }
-        .pin-modal-box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative; animation: slideUp 0.3s ease-out; }
+        .pin-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: 2000; align-items: center; justify-content: center; padding: 15px; }
+        .pin-modal-box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative; }
         .close-btn { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5rem; color: #888; cursor: pointer; padding: 0; }
         .pin-img-preview { width: 100%; max-height: 220px; object-fit: cover; border-radius: 8px; margin: 12px 0; border: 1px solid #ddd; }
         
@@ -82,8 +79,6 @@
         .comment-input-group button { background-color: #1976d2; padding: 8px 12px; }
 
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 3000; align-items: center; justify-content: center; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .modal-box { background: white; padding: 25px 30px; border-radius: 12px; text-align: center; max-width: 400px; width: 80%; }
         .modal-icon { font-size: 3rem; margin-bottom: 15px; }
         .icon-warning { color: #f57c00; } .icon-success { color: #4caf50; } .icon-error { color: #d32f2f; } .icon-question { color: #1976d2; }
@@ -102,7 +97,6 @@
     </header>
 
     <main>
-        <!-- 🔴 แผงสถิติใหม่ แยกตามระดับความเสี่ยง 4 กล่อง 🔴 -->
         <div class="stats-panel">
             <div class="stat-card total">
                 <div class="stat-label">ทั้งหมด</div>
@@ -122,14 +116,13 @@
             </div>
         </div>
 
-        <!-- ตัวนับผู้เข้าชมแบบเล็กๆ มุมขวา ไม่เด่น -->
         <div class="visitor-counter-mini">
             👥 ผู้เข้าชมเว็บไซต์ทั้งหมด: <span id="total-visitors">0</span> คน
         </div>
 
         <div class="instructions">
-            <strong>📢 คำแนะนำการใช้งาน:</strong> 
-            เลื่อนดูแผนที่และคลิกที่หมุดเพื่อตรวจสอบจุดเสี่ยง หรือกดปุ่ม <b>"➕ แจ้งจุดเสี่ยง"</b> ที่มุมขวาล่างเพื่อรายงานเหตุ
+            <strong>📢 คำแนะนำ:</strong> 
+            เลื่อนดูแผนที่และคลิกที่หมุดเพื่อตรวจสอบรายละเอียดจุดเสี่ยง หรือคลิกปุ่ม <b>"➕ แจ้งจุดเสี่ยง"</b> ที่มุมขวาล่างเพื่อรายงานเหตุเพิ่มเติม
         </div>
 
         <div class="search-container">
@@ -174,7 +167,7 @@
             </div>
             
             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button onclick="processAndSavePin()" style="flex: 1;">📌 บันทึกพิกัด</button>
+                <button onclick="processAndSavePin()" style="flex: 1;">📌 ส่งเรื่องให้แอดมินตรวจสอบ</button>
                 <button class="cancel" onclick="cancelPin()" style="flex: 1;">ล้างข้อมูล</button>
             </div>
         </div>
@@ -185,6 +178,8 @@
             <button class="close-btn" onclick="closePinDetails()">✖</button>
             <div id="pd-badge"></div>
             <h2 id="pd-title" style="margin: 10px 0 5px 0; color: #333; font-size: 1.3rem;"></h2>
+            <!-- 🔴 เพิ่มแสดงวันเวลาที่แจ้ง 🔴 -->
+            <div id="pd-time" style="font-size: 0.85rem; color: #666; margin-bottom: 8px;"></div>
             <p id="pd-detail" style="color: #555; margin-top: 0; line-height: 1.4; font-size: 0.95rem;"></p>
             <img id="pd-img" class="pin-img-preview" src="" style="display: none;">
             <div id="pd-delete-container"></div>
@@ -266,7 +261,6 @@
         }
         function closeModal() { document.getElementById('customModal').style.display = 'none'; }
 
-        // --- ตั้งค่าแผนที่ ---
         const map = L.map('map', { maxBounds: L.latLngBounds(L.latLng(13.9400, 100.5800), L.latLng(14.0900, 100.9000)), maxBoundsViscosity: 1.0, minZoom: 11 }).setView([14.0366, 100.7300], 12);
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Tiles &copy; Esri' }).addTo(map);
 
@@ -298,16 +292,13 @@
             currentMarkers.forEach(marker => map.removeLayer(marker));
             currentMarkers = []; globalPinData = snapshot.val() || {};
             
-            let totalCount = 0;
-            let highCount = 0;
-            let mediumCount = 0;
-            let lowCount = 0;
+            let totalCount = 0; let highCount = 0; let mediumCount = 0; let lowCount = 0;
 
             Object.keys(globalPinData).forEach(key => {
                 const pin = globalPinData[key];
+                if (pin.status !== 'approved') return;
+
                 let markerIcon = icons[pin.risk] || icons['medium'];
-                
-                // นับจำนวนแยกตามระดับความเสี่ยง
                 if (pin.risk === 'high') highCount++;
                 else if (pin.risk === 'medium') mediumCount++;
                 else if (pin.risk === 'low') lowCount++;
@@ -319,7 +310,6 @@
                 currentMarkers.push(newMarker);
             });
 
-            // อัปเดตตัวเลขแสดงผลบนหน้าจอ
             document.getElementById('count-total').innerText = totalCount;
             document.getElementById('count-high').innerText = highCount;
             document.getElementById('count-medium').innerText = mediumCount;
@@ -337,7 +327,13 @@
             else badgeHtml = '<span class="risk-badge risk-low">🟡 ความเสี่ยงน้อย</span>';
             
             document.getElementById('pd-badge').innerHTML = badgeHtml;
-            document.getElementById('pd-title').innerText = pin.title; document.getElementById('pd-detail').innerText = pin.detail;
+            document.getElementById('pd-title').innerText = pin.title; 
+            
+            // แปลง Timestamp เป็น วัน เวลาไทย
+            const timeString = new Date(pin.timestamp).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
+            document.getElementById('pd-time').innerText = `🕒 แจ้งเมื่อ: ${timeString}`;
+            
+            document.getElementById('pd-detail').innerText = pin.detail;
             
             const imgEl = document.getElementById('pd-img');
             if (pin.image) { imgEl.src = pin.image; imgEl.style.display = 'block'; } else { imgEl.style.display = 'none'; }
@@ -428,7 +424,7 @@
             const detail = document.getElementById('dangerDetails').value; const imageFile = document.getElementById('dangerImage').files[0];
 
             if(!title || !detail) return showAlert('warning', 'ข้อมูลไม่ครบ', 'กรุณากรอกชื่อสถานที่และรายละเอียดครับ');
-            const btnSave = document.querySelector('button[onclick="processAndSavePin()"]'); btnSave.innerText = "กำลังบันทึก..."; btnSave.disabled = true;
+            const btnSave = document.querySelector('button[onclick="processAndSavePin()"]'); btnSave.innerText = "กำลังส่งเรื่อง..."; btnSave.disabled = true;
 
             if (imageFile) {
                 const reader = new FileReader(); reader.onload = e => {
@@ -443,19 +439,23 @@
         }
 
         function saveDataToFirebase(title, detail, risk, imageUrl, btnSave) {
-            db.ref('safeZonePins').push({ lat: currentLatLng.lat, lng: currentLatLng.lng, title: title, detail: detail, risk: risk, image: imageUrl || null, timestamp: Date.now(), creatorId: myDeviceId })
-                .then(() => { 
-                    closeFormModal(); 
-                    showAlert('success', 'บันทึกสำเร็จ!', 'สร้างจุดเสี่ยงเรียบร้อยแล้ว'); 
-                    cancelPin(); 
-                    btnSave.innerText = "📌 บันทึกพิกัด"; 
-                    btnSave.disabled = false; 
-                })
-                .catch(() => { 
-                    showAlert('error', 'ข้อผิดพลาด!', 'เชื่อมต่อฐานข้อมูลล้มเหลว'); 
-                    btnSave.innerText = "📌 บันทึกพิกัด"; 
-                    btnSave.disabled = false; 
-                });
+            db.ref('safeZonePins').push({ 
+                lat: currentLatLng.lat, lng: currentLatLng.lng, title: title, detail: detail, 
+                risk: risk, image: imageUrl || null, timestamp: Date.now(), 
+                creatorId: myDeviceId, status: 'pending' 
+            })
+            .then(() => { 
+                closeFormModal(); 
+                showAlert('success', 'ส่งเรื่องสำเร็จ!', 'ข้อมูลของคุณถูกส่งให้แอดมินตรวจสอบแล้ว จะแสดงบนแผนที่หลังได้รับการอนุมัติครับ'); 
+                cancelPin(); 
+                btnSave.innerText = "📌 ส่งเรื่องให้แอดมินตรวจสอบ"; 
+                btnSave.disabled = false; 
+            })
+            .catch(() => { 
+                showAlert('error', 'ข้อผิดพลาด!', 'เชื่อมต่อฐานข้อมูลล้มเหลว'); 
+                btnSave.innerText = "📌 ส่งเรื่องให้แอดมินตรวจสอบ"; 
+                btnSave.disabled = false; 
+            });
         }
     </script>
 </body>
