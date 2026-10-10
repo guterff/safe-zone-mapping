@@ -15,7 +15,6 @@
         main { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
         .pending-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; display: flex; gap: 20px; align-items: flex-start; }
         
-        /* 🔴 กล่องแผนที่ย่อยสำหรับให้แอดมินเช็คพิกัด 🔴 */
         .mini-map { width: 220px; height: 150px; border-radius: 6px; border: 1px solid #ccc; z-index: 1; flex-shrink: 0; }
         
         .pending-info { flex: 1; }
@@ -79,7 +78,6 @@
                     if (pin.status === 'pending') {
                         hasPending = true;
                         
-                        // แปลง Timestamp เป็น วัน เวลาไทย
                         const timeString = new Date(pin.timestamp).toLocaleString('th-TH', { dateStyle: 'full', timeStyle: 'medium' });
                         
                         let riskText = 'ความเสี่ยงปานกลาง';
@@ -96,7 +94,6 @@
                         }
 
                         card.innerHTML = `
-                            <!-- แผนที่ย่อยสำหรับดูพิกัด -->
                             <div id="mini-map-${key}" class="mini-map"></div>
                             
                             <div class="pending-info">
@@ -108,20 +105,19 @@
                                     📍 <strong>พิกัด GPS:</strong> ${pin.lat.toFixed(5)}, ${pin.lng.toFixed(5)}
                                 </div>
                                 <div class="btn-group">
-                                    <button class="btn-approve" onclick="updatePinStatus('${key}', 'approved')">✅ อนุมัติให้นำไปแสดง</button>
+                                    <button class="btn-approve" onclick="updatePinStatus('${key}', 'approved')">✅ อนุมัติ (เปลี่ยนเป็นสีตามระดับความเสี่ยง)</button>
                                     <button class="btn-reject" onclick="updatePinStatus('${key}', 'rejected')">❌ ปฏิเสธ / ลบทิ้ง</button>
                                 </div>
                             </div>
                         `;
                         listEl.appendChild(card);
 
-                        // สร้างแผนที่ย่อย (Mini-Map) ขึ้นมาโชว์จุดที่คนปักทันทีหลังเรนเดอร์การ์ดเสร็จ
                         setTimeout(() => {
                             const miniMap = L.map(`mini-map-${key}`, {
                                 zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false
                             }).setView([pin.lat, pin.lng], 15);
                             
-                            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }).addTo(miniMap);
+                            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }).setItemRef?.();
                             L.marker([pin.lat, pin.lng]).addTo(miniMap);
                         }, 100);
                     }
@@ -136,10 +132,10 @@
         function updatePinStatus(pinKey, newStatus) {
             if (newStatus === 'approved') {
                 db.ref(`safeZonePins/${pinKey}`).update({ status: 'approved' })
-                    .then(() => alert('อนุมัติพิกัดเรียบร้อย! ข้อมูลแสดงบนแผนที่หลักแล้ว'));
+                    .then(() => alert('อนุมัติเรียบร้อย! หมุดบนแผนที่หลักเปลี่ยนเป็นสีตามระดับความเสี่ยงแล้วครับ'));
             } else {
                 db.ref(`safeZonePins/${pinKey}`).remove()
-                    .then(() => alert('ปฏิเสธและลบข้อมูลสแปมเรียบร้อยแล้ว'));
+                    .then(() => alert('ปฏิเสธและลบข้อมูลสแปมเรียบร้อยแล้วครับ'));
             }
         }
     </script>

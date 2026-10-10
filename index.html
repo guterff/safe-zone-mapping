@@ -64,6 +64,7 @@
 
         .risk-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; color: white; font-size: 0.9rem; font-weight: bold; }
         .risk-high { background-color: #d32f2f; } .risk-medium { background-color: #f57c00; } .risk-low { background-color: #fbc02d; color: #333; } 
+        .risk-pending { background-color: #757575; }
 
         .pin-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: 2000; align-items: center; justify-content: center; padding: 15px; }
         .pin-modal-box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative; }
@@ -122,7 +123,7 @@
 
         <div class="instructions">
             <strong>📢 คำแนะนำ:</strong> 
-            เลื่อนดูแผนที่และคลิกที่หมุดเพื่อตรวจสอบรายละเอียดจุดเสี่ยง หรือคลิกปุ่ม <b>"➕ แจ้งจุดเสี่ยง"</b> ที่มุมขวาล่างเพื่อรายงานเหตุเพิ่มเติม
+            เลื่อนดูแผนที่และคลิกหมุดเพื่อตรวจสอบจุดเสี่ยง (หมุดสีเทา = อยู่ระหว่างรอแอดมินตรวจสอบ) หรือคลิกปุ่ม <b>"➕ แจ้งจุดเสี่ยง"</b> เพื่อรายงานเหตุ
         </div>
 
         <div class="search-container">
@@ -178,7 +179,6 @@
             <button class="close-btn" onclick="closePinDetails()">✖</button>
             <div id="pd-badge"></div>
             <h2 id="pd-title" style="margin: 10px 0 5px 0; color: #333; font-size: 1.3rem;"></h2>
-            <!-- 🔴 เพิ่มแสดงวันเวลาที่แจ้ง 🔴 -->
             <div id="pd-time" style="font-size: 0.85rem; color: #666; margin-bottom: 8px;"></div>
             <p id="pd-detail" style="color: #555; margin-top: 0; line-height: 1.4; font-size: 0.95rem;"></p>
             <img id="pd-img" class="pin-img-preview" src="" style="display: none;">
@@ -276,7 +276,8 @@
         const icons = {
             'high': makeRiskIcon('#d32f2f'),   
             'medium': makeRiskIcon('#f57c00'), 
-            'low': makeRiskIcon('#fbc02d')     
+            'low': makeRiskIcon('#fbc02d'),
+            'pending': makeRiskIcon('#757575') // 🔴 สีเทาสำหรับสถานะรอตรวจสอบ 🔴
         };
         
         const tempIcon = L.icon({ 
@@ -288,6 +289,7 @@
 
         let currentMarkers = []; let globalPinData = {}; 
 
+        // 🔴 โหลดแสดงหมุดทั้งที่ approved และ pending (pending จะแสดงเป็นสีเทา) 🔴
         db.ref('safeZonePins').on('value', (snapshot) => {
             currentMarkers.forEach(marker => map.removeLayer(marker));
             currentMarkers = []; globalPinData = snapshot.val() || {};
@@ -296,13 +298,19 @@
 
             Object.keys(globalPinData).forEach(key => {
                 const pin = globalPinData[key];
-                if (pin.status !== 'approved') return;
-
-                let markerIcon = icons[pin.risk] || icons['medium'];
-                if (pin.risk === 'high') highCount++;
-                else if (pin.risk === 'medium') mediumCount++;
-                else if (pin.risk === 'low') lowCount++;
-                totalCount++;
+                
+                let markerIcon;
+                if (pin.status === 'pending') {
+                    markerIcon = icons['pending']; // แสดงสีเทา
+                } else if (pin.status === 'approved') {
+                    markerIcon = icons[pin.risk] || icons['medium'];
+                    if (pin.risk === 'high') highCount++;
+                    else if (pin.risk === 'medium') mediumCount++;
+                    else if (pin.risk === 'low') lowCount++;
+                    totalCount++;
+                } else {
+                    return; // ถ้าสถานะอื่นๆ ข้ามไป
+                }
 
                 const newMarker = L.marker([pin.lat, pin.lng], {icon: markerIcon});
                 newMarker.on('click', () => openPinDetails(key));
@@ -322,14 +330,19 @@
             currentActivePinKey = pinKey;
             
             let badgeHtml = '';
-            if(pin.risk === 'high') badgeHtml = '<span class="risk-badge risk-high">🔴 ความเสี่ยงสูง</span>';
-            else if(pin.risk === 'medium') badgeHtml = '<span class="risk-badge risk-medium">🟠 ความเสี่ยงปานกลาง</span>';
-            else badgeHtml = '<span class="risk-badge risk-low">🟡 ความเสี่ยงน้อย</span>';
+            if(pin.status === 'pending') {
+                badgeHtml = '<span class="risk-badge risk-pending">⚪ รอแอดมินตรวจสอบ</span>';
+            } else if(pin.risk === 'high') {
+                badgeHtml = '<span class="risk-badge risk-high">🔴 ความเสี่ยงสูง</span>';
+            } else if(pin.risk === 'medium') {
+                badgeHtml = '<span class="risk-badge risk-medium">🟠 ความเสี่ยงปานกลาง</span>';
+            } else {
+                badgeHtml = '<span class="risk-badge risk-low">🟡 ความเสี่ยงน้อย</span>';
+            }
             
             document.getElementById('pd-badge').innerHTML = badgeHtml;
             document.getElementById('pd-title').innerText = pin.title; 
             
-            // แปลง Timestamp เป็น วัน เวลาไทย
             const timeString = new Date(pin.timestamp).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
             document.getElementById('pd-time').innerText = `🕒 แจ้งเมื่อ: ${timeString}`;
             
@@ -340,7 +353,15 @@
             
             const delContainer = document.getElementById('pd-delete-container');
             if (pin.creatorId === myDeviceId) { delContainer.innerHTML = `<button style="width:100%; background-color:#d32f2f; margin-top:10px;" onclick="confirmDeletePin('${pinKey}')">🗑️ ลบหมุดของฉัน</button>`; } else { delContainer.innerHTML = ''; }
-            db.ref(`safeZonePins/${pinKey}/comments`).on('value', renderComments);
+            
+            // เปิดคอมเมนต์เฉพาะอันที่อนุมัติแล้ว
+            if (pin.status === 'approved') {
+                db.ref(`safeZonePins/${pinKey}/comments`).on('value', renderComments);
+                document.querySelector('.comment-section').style.display = 'block';
+            } else {
+                document.querySelector('.comment-section').style.display = 'none';
+            }
+
             document.getElementById('pinDetailsModal').style.display = 'flex';
         }
 
@@ -446,7 +467,7 @@
             })
             .then(() => { 
                 closeFormModal(); 
-                showAlert('success', 'ส่งเรื่องสำเร็จ!', 'ข้อมูลของคุณถูกส่งให้แอดมินตรวจสอบแล้ว จะแสดงบนแผนที่หลังได้รับการอนุมัติครับ'); 
+                showAlert('success', 'ส่งเรื่องสำเร็จ!', 'หมุดของคุณขึ้นบนแผนที่แล้วในสถานะ "รอตรวจสอบ" (สีเทา) จะเปลี่ยนเป็นสีตามระดับความเสี่ยงเมื่อแอดมินอนุมัติครับ'); 
                 cancelPin(); 
                 btnSave.innerText = "📌 ส่งเรื่องให้แอดมินตรวจสอบ"; 
                 btnSave.disabled = false; 
