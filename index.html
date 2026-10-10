@@ -34,7 +34,6 @@
         
         #map { height: 500px; width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-bottom: 15px; border: 2px solid #ddd; z-index: 1; }
 
-        /* 🔴 ปุ่มลอยสำหรับเปิดฟอร์มแจ้งเหตุ (FAB) 🔴 */
         .fab-btn {
             position: fixed; bottom: 25px; right: 25px; background-color: #d32f2f; color: white;
             border: none; border-radius: 30px; padding: 12px 22px; font-size: 1.05rem; font-weight: bold;
@@ -43,7 +42,6 @@
         }
         .fab-btn:hover { background-color: #b71c1c; transform: scale(1.05); }
 
-        /* 🔴 Modal สำหรับฟอร์มปักหมุด (ซ่อนไว้ก่อน กดปุ่มลอยถึงจะเด้ง) 🔴 */
         .form-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: 2500; align-items: center; justify-content: center; padding: 15px; animation: fadeIn 0.2s ease-out; }
         .form-modal-box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative; animation: slideUp 0.3s ease-out; }
         
@@ -59,7 +57,6 @@
         .risk-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; color: white; font-size: 0.9rem; font-weight: bold; }
         .risk-high { background-color: #d32f2f; } .risk-medium { background-color: #f57c00; } .risk-low { background-color: #fbc02d; color: #333; } 
 
-        /* Modal ดูรายละเอียดหมุด & คอมเมนต์ */
         .pin-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: 2000; align-items: center; justify-content: center; padding: 15px; animation: fadeIn 0.2s ease-out; }
         .pin-modal-box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative; animation: slideUp 0.3s ease-out; }
         .close-btn { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5rem; color: #888; cursor: pointer; padding: 0; }
@@ -73,7 +70,6 @@
         .comment-input-group input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 0.9rem; }
         .comment-input-group button { background-color: #1976d2; padding: 8px 12px; }
 
-        /* Custom Alert Modal */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 3000; align-items: center; justify-content: center; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -120,10 +116,8 @@
         <div id="map"></div>
     </main>
 
-    <!-- 🔴 ปุ่มลอยเปิดฟอร์มแจ้งจุดเสี่ยง (FAB) 🔴 -->
     <button class="fab-btn" onclick="openFormModal()">➕ แจ้งจุดเสี่ยง</button>
 
-    <!-- 🔴 Modal ฟอร์มกรอกข้อมูลแจ้งจุดเสี่ยง 🔴 -->
     <div id="formModal" class="form-modal-overlay">
         <div class="form-modal-box">
             <button class="close-btn" onclick="closeFormModal()">✖</button>
@@ -161,7 +155,6 @@
         </div>
     </div>
 
-    <!-- UI หน้าต่างดูรายละเอียดหมุด & คอมเมนต์ -->
     <div id="pinDetailsModal" class="pin-modal-overlay">
         <div class="pin-modal-box">
             <button class="close-btn" onclick="closePinDetails()">✖</button>
@@ -182,7 +175,6 @@
         </div>
     </div>
 
-    <!-- UI Custom Modal แจ้งเตือน -->
     <div id="customModal" class="modal-overlay">
         <div class="modal-box">
             <div id="modalIcon" class="modal-icon"></div>
@@ -221,13 +213,8 @@
             document.getElementById('total-visitors').innerText = data ? Object.keys(data).length : 0;
         });
 
-        // ควบคุม Modal ฟอร์มแจ้งเหตุ
-        function openFormModal() {
-            document.getElementById('formModal').style.display = 'flex';
-        }
-        function closeFormModal() {
-            document.getElementById('formModal').style.display = 'none';
-        }
+        function openFormModal() { document.getElementById('formModal').style.display = 'flex'; }
+        function closeFormModal() { document.getElementById('formModal').style.display = 'none'; }
 
         function showAlert(type, title, text, onConfirm = null) {
             const modal = document.getElementById('customModal'); const icon = document.getElementById('modalIcon');
@@ -258,12 +245,29 @@
         const map = L.map('map', { maxBounds: L.latLngBounds(L.latLng(13.9400, 100.5800), L.latLng(14.0900, 100.9000)), maxBoundsViscosity: 1.0, minZoom: 11 }).setView([14.0366, 100.7300], 12);
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Tiles &copy; Esri' }).addTo(map);
 
+        // หมุดใช้สีตามระดับความเสี่ยงโดยตรง ไม่พึ่งไฟล์รูปไอคอนภายนอก
+        function makeRiskIcon(color) {
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="46" viewBox="0 0 32 46"><filter id="s" x="-30%" y="-20%" width="160%" height="160%"><feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#000" flood-opacity=".35"/></filter><path filter="url(#s)" d="M16 1C7.7 1 1 7.7 1 16c0 11 15 29 15 29s15-18 15-29C31 7.7 24.3 1 16 1Z" fill="${color}" stroke="white" stroke-width="1.5"/><circle cx="16" cy="16" r="6.2" fill="white" stroke="rgba(0,0,0,.18)" stroke-width="1"/></svg>`;
+            return L.icon({
+                iconUrl: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+                iconSize: [32, 46],
+                iconAnchor: [16, 45],
+                popupAnchor: [0, -42]
+            });
+        }
         const icons = {
-            'high': L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41] }),
-            'medium': L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41] }),
-            'low': L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41] })
+            'high': makeRiskIcon('#d32f2f'),   // สีแดง = ความเสี่ยงสูง
+            'medium': makeRiskIcon('#f57c00'), // สีส้ม = ความเสี่ยงปานกลาง
+            'low': makeRiskIcon('#fbc02d')     // สีเหลือง = ความเสี่ยงน้อย
         };
-        const tempIcon = L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41] });
+        
+        // 🔴 ใช้ลิงก์พินสีน้ำเงินที่เสถียร 100% 🔴
+        const tempIcon = L.icon({ 
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png', 
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', 
+            iconSize: [25, 41], 
+            iconAnchor: [12, 41] 
+        });
 
         let currentMarkers = []; let globalPinData = {}; 
 
@@ -274,7 +278,7 @@
             let pinCount = 0;
             Object.keys(globalPinData).forEach(key => {
                 const pin = globalPinData[key];
-                let markerIcon = icons[pin.risk] || icons['high'];
+                let markerIcon = icons[pin.risk] || icons['medium'];
                 const newMarker = L.marker([pin.lat, pin.lng], {icon: markerIcon});
                 newMarker.on('click', () => openPinDetails(key));
                 newMarker.addTo(map); currentMarkers.push(newMarker); pinCount++;
