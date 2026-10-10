@@ -65,6 +65,60 @@
             font-size: 1.1rem;
         }
 
+        /* --- กล่องค้นหาและ Dropdown --- */
+        .search-container {
+            position: relative; 
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .search-container input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1.05rem;
+            transition: border-color 0.3s;
+        }
+        .search-container input:focus {
+            border-color: #d32f2f;
+            outline: none;
+        }
+        .search-container button.btn-search {
+            background-color: #1976d2; 
+        }
+        .search-container button.btn-search:hover {
+            background-color: #1565c0;
+        }
+
+        .autocomplete-items {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 80px; 
+            border: 1px solid #d4d4d4;
+            border-top: none;
+            z-index: 999;
+            background-color: #fff;
+            max-height: 250px;
+            overflow-y: auto;
+            border-radius: 0 0 6px 6px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .autocomplete-items div {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            font-size: 0.95rem;
+        }
+        .autocomplete-items div:hover {
+            background-color: #f1f1f1;
+        }
+        .autocomplete-items div:last-child {
+            border-bottom: none;
+        }
+
         #map { 
             height: 500px; 
             width: 100%;
@@ -87,7 +141,7 @@
         
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input, .form-group textarea {
+        .form-group input[type="text"], .form-group textarea {
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
@@ -95,17 +149,26 @@
             box-sizing: border-box;
             font-family: inherit;
         }
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px dashed #d32f2f;
+            border-radius: 4px;
+            background-color: #fafafa;
+            cursor: pointer;
+        }
         
         button {
             background-color: #d32f2f;
             color: white;
             border: none;
             padding: 10px 20px;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 1rem;
             font-family: inherit;
             font-weight: bold;
+            transition: 0.3s;
         }
         button:hover { background-color: #b71c1c; }
         button.cancel { background-color: #757575; margin-left: 10px; }
@@ -113,13 +176,94 @@
         
         .leaflet-popup-content h3 { margin: 0 0 5px 0; color: #d32f2f; font-size: 1.1rem; }
         .leaflet-popup-content p { margin: 0; color: #555; }
+        .popup-image {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            margin-top: 10px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+
+        /* --- สไตล์สำหรับ Custom Modal แจ้งเตือน --- */
+        .modal-overlay {
+            display: none; 
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-box {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 400px;
+            width: 80%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        .icon-warning { color: #f57c00; }
+        .icon-success { color: #4caf50; }
+        .icon-error { color: #d32f2f; }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .modal-text {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-btn {
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+        .modal-btn:hover { background-color: #1565c0; }
+        .btn-red { background-color: #d32f2f; }
+        .btn-red:hover { background-color: #b71c1c; }
+        .btn-green { background-color: #4caf50; }
+        .btn-green:hover { background-color: #388e3c; }
+
     </style>
 </head>
 <body>
 
     <header>
         <h1>📍 ปักหมุดจุดเสี่ยง (Safe Zone Mapping)</h1>
-        <p class="subtitle">วิชาสื่อสารกับสังคม - ประเทศไทย</p>
+        <p class="subtitle">สื่อสารกับสังคม - อำเภอธัญบุรี</p>
     </header>
 
     <main>
@@ -132,7 +276,13 @@
 
         <div class="instructions">
             <strong>📢 วิธีร่วมกิจกรรม:</strong> 
-            <b>คลิกบนแผนที่</b> ในบริเวณที่เป็น "จุดเสี่ยง" (เช่น ทางมืด, เกิดอุบัติเหตุบ่อย) เพื่อจำลองการแจ้งพิกัด
+            ค้นหาสถานที่ หรือ <b>คลิกบนแผนที่</b> ในบริเวณที่เป็น "จุดเสี่ยง" (เช่น ทางมืด, เกิดอุบัติเหตุบ่อย) เพื่อจำลองการแจ้งพิกัด
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="🔍 ค้นหาสถานที่, ซอย, ตลาด (เช่น ตลาดพรธิสาร, คลองหก)" oninput="handleInput(event)" onkeypress="handleEnter(event)" autocomplete="off">
+            <button class="btn-search" onclick="searchLocation()">ค้นหา</button>
+            <div id="searchResults" class="autocomplete-items"></div>
         </div>
 
         <div id="map"></div>
@@ -150,25 +300,86 @@
                 <label for="dangerDetails">รายละเอียดปัญหา</label>
                 <textarea id="dangerDetails" rows="3" placeholder="เช่น ไฟถนนเสีย ชอบมีคนเมาขับรถเร็ว"></textarea>
             </div>
+
+            <!-- ช่องอัปโหลดรูปภาพ -->
+            <div class="form-group">
+                <label for="dangerImage">แนบรูปภาพสถานที่ (ถ้ามี)</label>
+                <input type="file" id="dangerImage" accept="image/*">
+            </div>
             
-            <button onclick="savePin()">📌 ปักหมุดบันทึกข้อมูล</button>
+            <button onclick="processAndSavePin()">📌 ปักหมุดบันทึกข้อมูล</button>
             <button class="cancel" onclick="cancelPin()">ยกเลิก</button>
         </div>
     </main>
+
+    <!-- โครงสร้าง Custom Modal -->
+    <div id="customModal" class="modal-overlay">
+        <div class="modal-box">
+            <div id="modalIcon" class="modal-icon"></div>
+            <h2 id="modalTitle" class="modal-title">แจ้งเตือน</h2>
+            <p id="modalText" class="modal-text">ข้อความ...</p>
+            <button id="modalBtn" class="modal-btn" onclick="closeModal()">ตกลง</button>
+        </div>
+    </div>
 
     <!-- โหลด Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     
     <script>
-        // 1. ตั้งค่าแผนที่เริ่มต้นที่ มทร.ธัญบุรี
-        const map = L.map('map').setView([14.0366, 100.7300], 14);
+        // --- ฟังก์ชันควบคุม Custom Modal ---
+        function showAlert(type, title, text) {
+            const modal = document.getElementById('customModal');
+            const icon = document.getElementById('modalIcon');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalText = document.getElementById('modalText');
+            const btn = document.getElementById('modalBtn');
+
+            modalTitle.innerText = title;
+            modalText.innerText = text;
+
+            btn.className = 'modal-btn';
+            
+            if (type === 'warning') {
+                icon.innerHTML = '⚠️';
+                icon.className = 'modal-icon icon-warning';
+                btn.classList.add('btn-red');
+            } else if (type === 'success') {
+                icon.innerHTML = '✅';
+                icon.className = 'modal-icon icon-success';
+                btn.classList.add('btn-green');
+            } else if (type === 'error') {
+                icon.innerHTML = '❌';
+                icon.className = 'modal-icon icon-error';
+                btn.classList.add('btn-red');
+            } else {
+                icon.innerHTML = 'ℹ️';
+                icon.className = 'modal-icon';
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').style.display = 'none';
+        }
+
+        // -------------------------------------------------------------
+        // 1. ตั้งค่าขอบเขตแผนที่ (จำกัดเฉพาะอำเภอธัญบุรีและพื้นที่ใกล้เคียง)
+        // -------------------------------------------------------------
+        const southWest = L.latLng(13.9400, 100.5800); // พิกัดมุมซ้ายล่าง (รังสิต/ปทุม)
+        const northEast = L.latLng(14.0900, 100.9000); // พิกัดมุมขวาบน (คลอง 14/นครนายก)
+        const bounds = L.latLngBounds(southWest, northEast);
+
+        const map = L.map('map', {
+            maxBounds: bounds,         // ล็อคไม่ให้ลากแผนที่ออกนอกกรอบนี้
+            maxBoundsViscosity: 1.0,   // ตั้งความหนืดเป็น 1.0 (ลากออกไม่ได้เลย 100%)
+            minZoom: 11                // จำกัดการซูมออก ไม่ให้เห็นทั้งประเทศ
+        }).setView([14.0366, 100.7300], 12);
         
-        // --- เปลี่ยนมาใช้แผนที่ของ ESRI ที่ฟรีและไม่ต้องใช้ API Key ---
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
             maxZoom: 19,
-            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, iPC, NAVTEQ, USGS, Intermap, METI, NRCAN, Esri Japan'
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri'
         }).addTo(map);
-        // -------------------------------------------------------------
 
         // 2. ไอคอนหมุดสีแดง
         const dangerIcon = L.icon({
@@ -177,35 +388,110 @@
             iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
         });
 
-        // 3. ระบบ Database จำลองด้วย LocalStorage
+        // 3. ระบบ Database จำลองด้วย LocalStorage 
         let savedPins = JSON.parse(localStorage.getItem('safeZonePins')) || [];
-        
-        // ข้อมูล Seed Data เริ่มต้น (มีไว้กันเว็บโล่ง)
-        const seedPins = [
-            { lat: 14.0385, lng: 100.7280, title: "โค้งอันตราย", detail: "มืดมาก ชอบมีรถขับแหกโค้งดึกๆ" },
-            { lat: 14.0320, lng: 100.7350, title: "จุดกลับรถ", detail: "ช่วงดึกมักมีคนเมาขับรถฝ่าไฟกลับรถ" }
-        ];
 
-        // โหลดหมุดทั้งหมดขึ้นแผนที่
         function renderPins() {
-            // โหลด Seed Data
-            seedPins.forEach(pin => {
-                L.marker([pin.lat, pin.lng], {icon: dangerIcon}).addTo(map)
-                 .bindPopup(`<h3>⚠️ ${pin.title}</h3><p>${pin.detail}</p>`);
-            });
-            
-            // โหลดข้อมูลที่ผู้ใช้ User ปักเพิ่มจาก LocalStorage
             savedPins.forEach(pin => {
-                L.marker([pin.lat, pin.lng], {icon: dangerIcon}).addTo(map)
-                 .bindPopup(`<h3>⚠️ ${pin.title}</h3><p>${pin.detail}</p>`);
+                let popupContent = `<h3>⚠️ ${pin.title}</h3><p>${pin.detail}</p>`;
+                if(pin.image) {
+                    popupContent += `<img src="${pin.image}" class="popup-image">`;
+                }
+                L.marker([pin.lat, pin.lng], {icon: dangerIcon}).addTo(map).bindPopup(popupContent);
             });
-
-            // อัปเดตตัวเลข
-            document.getElementById('total-pins').innerText = seedPins.length + savedPins.length;
+            document.getElementById('total-pins').innerText = savedPins.length;
         }
         renderPins();
 
-        // 4. การทำงานตอนคลิกแผนที่
+        // -------------------------------------------------------------
+        // ระบบค้นหาสถานที่ (บังคับค้นหาเฉพาะในกรอบธัญบุรี)
+        // -------------------------------------------------------------
+        let searchTimeout = null;
+
+        // Viewbox สำหรับจำกัดพื้นที่ค้นหาในธัญบุรี (ซ้าย,บน,ขวา,ล่าง)
+        const viewBoxStr = "100.5800,14.0900,100.9000,13.9400"; 
+
+        function handleInput(e) {
+            clearTimeout(searchTimeout);
+            const query = e.target.value;
+            const resultsContainer = document.getElementById('searchResults');
+            
+            if (query.length < 3) {
+                resultsContainer.innerHTML = '';
+                return;
+            }
+
+            searchTimeout = setTimeout(async () => {
+                // เพิ่ม &viewbox และ &bounded=1 เพื่อล็อคพื้นที่ค้นหา
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=th&viewbox=${viewBoxStr}&bounded=1&limit=5`;
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    resultsContainer.innerHTML = '';
+                    
+                    if (data.length > 0) {
+                        data.forEach(item => {
+                            const div = document.createElement('div');
+                            div.innerHTML = `<strong>${item.name}</strong> <span style="font-size:0.85em;color:#666;">${item.display_name}</span>`;
+                            
+                            div.onclick = function() {
+                                document.getElementById('searchInput').value = item.name;
+                                resultsContainer.innerHTML = ''; 
+                                map.flyTo([item.lat, item.lon], 16, { animate: true, duration: 1.5 });
+                            };
+                            resultsContainer.appendChild(div);
+                        });
+                    } else {
+                        resultsContainer.innerHTML = '<div style="color:#999; text-align:center;">ไม่พบข้อมูลสถานที่ (ในเขตธัญบุรี)</div>';
+                    }
+                } catch (error) {
+                    console.error("Autocomplete error:", error);
+                }
+            }, 500);
+        }
+
+        document.addEventListener("click", function (e) {
+            if (e.target.id !== "searchInput") {
+                document.getElementById('searchResults').innerHTML = '';
+            }
+        });
+        
+        function handleEnter(e) {
+            if (e.key === 'Enter') {
+                searchLocation();
+            }
+        }
+
+        async function searchLocation() {
+            const query = document.getElementById('searchInput').value;
+            if(!query) {
+                showAlert('warning', 'แจ้งเตือน', 'กรุณาพิมพ์ชื่อสถานที่ที่ต้องการค้นหาครับ');
+                return;
+            }
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=th&viewbox=${viewBoxStr}&bounded=1&limit=1`;
+            try {
+                const btn = document.querySelector('.btn-search');
+                btn.innerText = "กำลังหา...";
+                document.getElementById('searchResults').innerHTML = '';
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if(data.length > 0) {
+                    map.flyTo([data[0].lat, data[0].lon], 16, { animate: true, duration: 1.5 });
+                } else {
+                    showAlert('info', 'ไม่พบสถานที่', 'ไม่พบสถานที่นี้ในเขตอำเภอธัญบุรีครับ ลองเปลี่ยนคำค้นหาดูใหม่');
+                }
+                btn.innerText = "ค้นหา"; 
+            } catch (error) {
+                console.error("Search error:", error);
+                showAlert('error', 'เกิดข้อผิดพลาด', 'เกิดข้อผิดพลาดในการค้นหา ลองใหม่อีกครั้งครับ');
+                document.querySelector('.btn-search').innerText = "ค้นหา";
+            }
+        }
+
+        // 4. การทำงานตอนคลิกแผนที่เพื่อสร้างหมุด
         let tempMarker = null; 
         let currentLatLng = null;
 
@@ -213,7 +499,7 @@
             currentLatLng = e.latlng;
             if (tempMarker) map.removeLayer(tempMarker);
             
-            tempMarker = L.marker(currentLatLng).addTo(map); // หมุดชั่วคราวสีฟ้า
+            tempMarker = L.marker(currentLatLng).addTo(map); 
             
             document.getElementById('report-form-container').style.display = 'block';
             document.getElementById('display-latlng').innerText = `${currentLatLng.lat.toFixed(4)}, ${currentLatLng.lng.toFixed(4)}`;
@@ -225,28 +511,68 @@
             hideForm();
         }
 
-        // 5. บันทึกข้อมูลลง LocalStorage
-        function savePin() {
+        // 5. ระบบประมวลผลรูปภาพและบันทึกข้อมูล
+        function processAndSavePin() {
             const title = document.getElementById('locationName').value;
             const detail = document.getElementById('dangerDetails').value;
+            const imageFile = document.getElementById('dangerImage').files[0];
 
             if(!title || !detail) {
-                alert("กรุณากรอกข้อมูลให้ครบถ้วนครับ");
+                showAlert('warning', 'ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบถ้วนครับ');
                 return;
             }
 
-            // นำข้อมูลใหม่ Push เข้า Array และเซฟลง LocalStorage
-            const newPin = { lat: currentLatLng.lat, lng: currentLatLng.lng, title: title, detail: detail };
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 400; 
+                        const scaleSize = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scaleSize;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        const compressedImage = canvas.toDataURL('image/jpeg', 0.7);
+                        saveDataToLocal(title, detail, compressedImage);
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                saveDataToLocal(title, detail, null);
+            }
+        }
+
+        function saveDataToLocal(title, detail, imageUrl) {
+            const newPin = { lat: currentLatLng.lat, lng: currentLatLng.lng, title: title, detail: detail, image: imageUrl };
             savedPins.push(newPin);
-            localStorage.setItem('safeZonePins', JSON.stringify(savedPins));
-
-            if (tempMarker) map.removeLayer(tempMarker); // ลบสีฟ้า
             
-            // วาดหมุดสีแดงอันใหม่ลงไป
-            L.marker(currentLatLng, {icon: dangerIcon}).addTo(map)
-             .bindPopup(`<h3>⚠️ ${title}</h3><p>${detail}</p>`).openPopup();
+            try {
+                localStorage.setItem('safeZonePins', JSON.stringify(savedPins));
+            } catch (error) {
+                showAlert('error', 'พื้นที่จัดเก็บเต็ม!', 'ไม่สามารถบันทึกรูปภาพได้ เนื่องจากพื้นที่ความจำเบราว์เซอร์เต็ม แนะนำให้เคลียร์ประวัติการท่องเว็บครับ');
+                savedPins.pop(); 
+                return;
+            }
 
-            document.getElementById('total-pins').innerText = seedPins.length + savedPins.length;
+            if (tempMarker) map.removeLayer(tempMarker);
+            
+            let popupContent = `<h3>⚠️ ${title}</h3><p>${detail}</p>`;
+            if(imageUrl) {
+                popupContent += `<img src="${imageUrl}" class="popup-image">`;
+            }
+
+            L.marker(currentLatLng, {icon: dangerIcon}).addTo(map)
+             .bindPopup(popupContent).openPopup();
+
+            document.getElementById('total-pins').innerText = savedPins.length;
+            
+            showAlert('success', 'บันทึกสำเร็จ!', 'ขอบคุณที่ร่วมแจ้งจุดเสี่ยง ข้อมูลและรูปภาพของคุณจะช่วยเตือนสติเพื่อนๆ ในชุมชนครับ');
+            
             hideForm();
         }
 
@@ -254,6 +580,7 @@
             document.getElementById('report-form-container').style.display = 'none';
             document.getElementById('locationName').value = '';
             document.getElementById('dangerDetails').value = '';
+            document.getElementById('dangerImage').value = ''; 
         }
     </script>
 </body>
