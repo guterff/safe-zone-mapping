@@ -115,12 +115,9 @@
         .autocomplete-items div:hover {
             background-color: #f1f1f1;
         }
-        .autocomplete-items div:last-child {
-            border-bottom: none;
-        }
 
         #map { 
-            height: 500px; 
+            height: 450px; 
             width: 100%;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -129,25 +126,27 @@
             z-index: 1; 
         }
 
+        /* เปิดฟอร์มให้แสดงผลค้างไว้ตลอด (ไม่ใช้ display: none แล้ว) */
         #report-form-container {
-            display: none; 
+            display: block; 
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             margin-bottom: 20px;
             border-top: 4px solid #d32f2f;
         }
         
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input[type="text"], .form-group textarea {
+        .form-group input[type="text"], .form-group textarea, .form-group select {
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
             box-sizing: border-box;
             font-family: inherit;
+            font-size: 1rem;
         }
         .form-group input[type="file"] {
             width: 100%;
@@ -174,8 +173,9 @@
         button.cancel { background-color: #757575; margin-left: 10px; }
         button.cancel:hover { background-color: #616161; }
         
-        .leaflet-popup-content h3 { margin: 0 0 5px 0; color: #d32f2f; font-size: 1.1rem; }
-        .leaflet-popup-content p { margin: 0; color: #555; }
+        /* สไตล์เนื้อหาใน Popup บนแผนที่ */
+        .leaflet-popup-content h3 { margin: 0 0 5px 0; color: #333; font-size: 1.1rem; }
+        .leaflet-popup-content p { margin: 5px 0 0 0; color: #555; }
         .popup-image {
             width: 100%;
             max-height: 200px;
@@ -184,6 +184,20 @@
             border-radius: 4px;
             border: 1px solid #eee;
         }
+        
+        /* ป้ายแจ้งระดับความเสี่ยง (Badge) */
+        .risk-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .risk-high { background-color: #d32f2f; }       
+        .risk-medium { background-color: #f57c00; }     
+        .risk-low { background-color: #fbc02d; color: #333; } 
 
         /* --- สไตล์สำหรับ Custom Modal แจ้งเตือน --- */
         .modal-overlay {
@@ -218,45 +232,21 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
-        .modal-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-        }
+        .modal-icon { font-size: 3rem; margin-bottom: 15px; }
         .icon-warning { color: #f57c00; }
         .icon-success { color: #4caf50; }
         .icon-error { color: #d32f2f; }
-
-        .modal-title {
-            font-size: 1.4rem;
-            font-weight: bold;
-            margin: 0 0 10px 0;
-            color: #333;
-        }
-
-        .modal-text {
-            font-size: 1rem;
-            color: #555;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-
+        .modal-title { font-size: 1.4rem; font-weight: bold; margin: 0 0 10px 0; color: #333; }
+        .modal-text { font-size: 1rem; color: #555; margin-bottom: 20px; line-height: 1.5; }
         .modal-btn {
-            background-color: #1976d2;
-            color: white;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            width: 100%;
-            transition: 0.2s;
+            background-color: #1976d2; color: white; border: none; padding: 10px 25px;
+            border-radius: 6px; font-size: 1.1rem; cursor: pointer; width: 100%; transition: 0.2s;
         }
         .modal-btn:hover { background-color: #1565c0; }
         .btn-red { background-color: #d32f2f; }
         .btn-red:hover { background-color: #b71c1c; }
         .btn-green { background-color: #4caf50; }
         .btn-green:hover { background-color: #388e3c; }
-
     </style>
 </head>
 <body>
@@ -276,24 +266,34 @@
 
         <div class="instructions">
             <strong>📢 วิธีร่วมกิจกรรม:</strong> 
-            ค้นหาสถานที่ หรือ <b>คลิกบนแผนที่</b> ในบริเวณที่เป็น "จุดเสี่ยง" (เช่น ทางมืด, เกิดอุบัติเหตุบ่อย) เพื่อจำลองการแจ้งพิกัด
+            ค้นหาสถานที่ หรือ <b>คลิกบนแผนที่ด้านล่าง</b> เพื่อเลือกพิกัดจุดเสี่ยง จากนั้นกรอกข้อมูลในฟอร์มแล้วกดบันทึกได้เลย!
         </div>
 
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="🔍 ค้นหาสถานที่, ซอย, ตลาด (เช่น ตลาดพรธิสาร, คลองหก)" oninput="handleInput(event)" onkeypress="handleEnter(event)" autocomplete="off">
+            <input type="text" id="searchInput" placeholder="🔍 ค้นหาสถานที่, ซอย, ตลาด (เช่น คลองหก, ตลาดพรธิสาร)" oninput="handleInput(event)" onkeypress="handleEnter(event)" autocomplete="off">
             <button class="btn-search" onclick="searchLocation()">ค้นหา</button>
             <div id="searchResults" class="autocomplete-items"></div>
         </div>
 
         <div id="map"></div>
 
+        <!-- ฟอร์มแสดงผลค้างไว้ตลอด -->
         <div id="report-form-container">
-            <h3 style="margin-top:0; color:#d32f2f;">แจ้งข้อมูลจุดเสี่ยงบริเวณนี้</h3>
-            <p style="font-size: 0.9rem; color: #666;">พิกัด: <span id="display-latlng"></span></p>
+            <h3 style="margin-top:0; color:#d32f2f;">📝 แจ้งข้อมูลจุดเสี่ยง</h3>
+            <p style="font-size: 0.95rem; color: #d32f2f; font-weight: bold;" id="display-latlng">📍 สถานะพิกัด: ยังไม่ได้เลือก (กรุณาคลิกบนแผนที่)</p>
             
             <div class="form-group">
                 <label for="locationName">ชื่อสถานที่ / จุดสังเกต</label>
                 <input type="text" id="locationName" placeholder="เช่น หน้าปากซอย...">
+            </div>
+
+            <div class="form-group">
+                <label for="riskLevel">ระดับความเสี่ยง</label>
+                <select id="riskLevel">
+                    <option value="high">🔴 ความเสี่ยงสูง (อันตรายมาก เกิดเหตุบ่อย)</option>
+                    <option value="medium" selected>🟠 ความเสี่ยงปานกลาง (ควรระมัดระวัง)</option>
+                    <option value="low">🟡 ความเสี่ยงน้อย (ยังพอรับมือได้)</option>
+                </select>
             </div>
             
             <div class="form-group">
@@ -301,14 +301,13 @@
                 <textarea id="dangerDetails" rows="3" placeholder="เช่น ไฟถนนเสีย ชอบมีคนเมาขับรถเร็ว"></textarea>
             </div>
 
-            <!-- ช่องอัปโหลดรูปภาพ -->
             <div class="form-group">
                 <label for="dangerImage">แนบรูปภาพสถานที่ (ถ้ามี)</label>
                 <input type="file" id="dangerImage" accept="image/*">
             </div>
             
             <button onclick="processAndSavePin()">📌 ปักหมุดบันทึกข้อมูล</button>
-            <button class="cancel" onclick="cancelPin()">ยกเลิก</button>
+            <button class="cancel" onclick="cancelPin()">ล้างข้อมูล</button>
         </div>
     </main>
 
@@ -336,26 +335,17 @@
 
             modalTitle.innerText = title;
             modalText.innerText = text;
-
             btn.className = 'modal-btn';
             
             if (type === 'warning') {
-                icon.innerHTML = '⚠️';
-                icon.className = 'modal-icon icon-warning';
-                btn.classList.add('btn-red');
+                icon.innerHTML = '⚠️'; icon.className = 'modal-icon icon-warning'; btn.classList.add('btn-red');
             } else if (type === 'success') {
-                icon.innerHTML = '✅';
-                icon.className = 'modal-icon icon-success';
-                btn.classList.add('btn-green');
+                icon.innerHTML = '✅'; icon.className = 'modal-icon icon-success'; btn.classList.add('btn-green');
             } else if (type === 'error') {
-                icon.innerHTML = '❌';
-                icon.className = 'modal-icon icon-error';
-                btn.classList.add('btn-red');
+                icon.innerHTML = '❌'; icon.className = 'modal-icon icon-error'; btn.classList.add('btn-red');
             } else {
-                icon.innerHTML = 'ℹ️';
-                icon.className = 'modal-icon';
+                icon.innerHTML = 'ℹ️'; icon.className = 'modal-icon';
             }
-
             modal.style.display = 'flex';
         }
 
@@ -363,17 +353,15 @@
             document.getElementById('customModal').style.display = 'none';
         }
 
-        // -------------------------------------------------------------
-        // 1. ตั้งค่าขอบเขตแผนที่ (จำกัดเฉพาะอำเภอธัญบุรีและพื้นที่ใกล้เคียง)
-        // -------------------------------------------------------------
-        const southWest = L.latLng(13.9400, 100.5800); // พิกัดมุมซ้ายล่าง (รังสิต/ปทุม)
-        const northEast = L.latLng(14.0900, 100.9000); // พิกัดมุมขวาบน (คลอง 14/นครนายก)
+        // 1. ตั้งค่าขอบเขตแผนที่ (อำเภอธัญบุรี)
+        const southWest = L.latLng(13.9400, 100.5800); 
+        const northEast = L.latLng(14.0900, 100.9000); 
         const bounds = L.latLngBounds(southWest, northEast);
 
         const map = L.map('map', {
-            maxBounds: bounds,         // ล็อคไม่ให้ลากแผนที่ออกนอกกรอบนี้
-            maxBoundsViscosity: 1.0,   // ตั้งความหนืดเป็น 1.0 (ลากออกไม่ได้เลย 100%)
-            minZoom: 11                // จำกัดการซูมออก ไม่ให้เห็นทั้งประเทศ
+            maxBounds: bounds,         
+            maxBoundsViscosity: 1.0,   
+            minZoom: 11                
         }).setView([14.0366, 100.7300], 12);
         
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
@@ -381,34 +369,43 @@
             attribution: 'Tiles &copy; Esri &mdash; Source: Esri'
         }).addTo(map);
 
-        // 2. ไอคอนหมุดสีแดง
-        const dangerIcon = L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+        // 2. ไอคอนหมุด
+        const iconConfig = {
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
             iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-        });
+        };
+        const icons = {
+            'high': L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', ...iconConfig }),
+            'medium': L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png', ...iconConfig }),
+            'low': L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png', ...iconConfig })
+        };
+        const tempIcon = L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png', ...iconConfig });
 
-        // 3. ระบบ Database จำลองด้วย LocalStorage 
+        // 3. โหลดข้อมูลจาก LocalStorage
         let savedPins = JSON.parse(localStorage.getItem('safeZonePins')) || [];
 
         function renderPins() {
             savedPins.forEach(pin => {
-                let popupContent = `<h3>⚠️ ${pin.title}</h3><p>${pin.detail}</p>`;
+                let markerIcon = icons[pin.risk] || icons['high'];
+                let badgeHtml = '';
+                if(pin.risk === 'high') badgeHtml = '<span class="risk-badge risk-high">🔴 ความเสี่ยงสูง</span>';
+                else if(pin.risk === 'medium') badgeHtml = '<span class="risk-badge risk-medium">🟠 ความเสี่ยงปานกลาง</span>';
+                else badgeHtml = '<span class="risk-badge risk-low">🟡 ความเสี่ยงน้อย</span>';
+
+                let popupContent = `${badgeHtml}<h3>${pin.title}</h3><p>${pin.detail}</p>`;
                 if(pin.image) {
                     popupContent += `<img src="${pin.image}" class="popup-image">`;
                 }
-                L.marker([pin.lat, pin.lng], {icon: dangerIcon}).addTo(map).bindPopup(popupContent);
+                L.marker([pin.lat, pin.lng], {icon: markerIcon}).addTo(map).bindPopup(popupContent);
             });
             document.getElementById('total-pins').innerText = savedPins.length;
         }
         renderPins();
 
         // -------------------------------------------------------------
-        // ระบบค้นหาสถานที่ (บังคับค้นหาเฉพาะในกรอบธัญบุรี)
+        // ระบบค้นหาสถานที่
         // -------------------------------------------------------------
         let searchTimeout = null;
-
-        // Viewbox สำหรับจำกัดพื้นที่ค้นหาในธัญบุรี (ซ้าย,บน,ขวา,ล่าง)
         const viewBoxStr = "100.5800,14.0900,100.9000,13.9400"; 
 
         function handleInput(e) {
@@ -422,19 +419,16 @@
             }
 
             searchTimeout = setTimeout(async () => {
-                // เพิ่ม &viewbox และ &bounded=1 เพื่อล็อคพื้นที่ค้นหา
                 const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=th&viewbox=${viewBoxStr}&bounded=1&limit=5`;
                 try {
                     const response = await fetch(url);
                     const data = await response.json();
-                    
                     resultsContainer.innerHTML = '';
                     
                     if (data.length > 0) {
                         data.forEach(item => {
                             const div = document.createElement('div');
                             div.innerHTML = `<strong>${item.name}</strong> <span style="font-size:0.85em;color:#666;">${item.display_name}</span>`;
-                            
                             div.onclick = function() {
                                 document.getElementById('searchInput').value = item.name;
                                 resultsContainer.innerHTML = ''; 
@@ -458,9 +452,7 @@
         });
         
         function handleEnter(e) {
-            if (e.key === 'Enter') {
-                searchLocation();
-            }
+            if (e.key === 'Enter') { searchLocation(); }
         }
 
         async function searchLocation() {
@@ -491,7 +483,7 @@
             }
         }
 
-        // 4. การทำงานตอนคลิกแผนที่เพื่อสร้างหมุด
+        // 4. การทำงานตอนคลิกแผนที่เพื่อเลือกพิกัด
         let tempMarker = null; 
         let currentLatLng = null;
 
@@ -499,26 +491,37 @@
             currentLatLng = e.latlng;
             if (tempMarker) map.removeLayer(tempMarker);
             
-            tempMarker = L.marker(currentLatLng).addTo(map); 
+            tempMarker = L.marker(currentLatLng, {icon: tempIcon}).addTo(map); 
             
-            document.getElementById('report-form-container').style.display = 'block';
-            document.getElementById('display-latlng').innerText = `${currentLatLng.lat.toFixed(4)}, ${currentLatLng.lng.toFixed(4)}`;
-            document.getElementById('report-form-container').scrollIntoView({ behavior: 'smooth' });
+            // อัปเดตข้อความพิกัดบนฟอร์มทันที
+            document.getElementById('display-latlng').innerHTML = `📍 พิกัดที่เลือก: <span style="color: #1976d2;">${currentLatLng.lat.toFixed(4)}, ${currentLatLng.lng.toFixed(4)}</span>`;
         });
 
         function cancelPin() {
             if (tempMarker) map.removeLayer(tempMarker);
-            hideForm();
+            currentLatLng = null;
+            document.getElementById('display-latlng').innerHTML = `📍 สถานะพิกัด: ยังไม่ได้เลือก (กรุณาคลิกบนแผนที่)`;
+            document.getElementById('locationName').value = '';
+            document.getElementById('dangerDetails').value = '';
+            document.getElementById('dangerImage').value = ''; 
+            document.getElementById('riskLevel').value = 'medium';
         }
 
         // 5. ระบบประมวลผลรูปภาพและบันทึกข้อมูล
         function processAndSavePin() {
+            // เช็คก่อนว่าผู้ใช้คลิกเลือกพิกัดบนแผนที่หรือยัง
+            if (!currentLatLng) {
+                showAlert('warning', 'ยังไม่ได้เลือกพิกัด!', 'กรุณาคลิกเลือกตำแหน่งจุดเสี่ยงบนแผนที่ก่อนกดบันทึกข้อมูลครับ');
+                return;
+            }
+
             const title = document.getElementById('locationName').value;
+            const risk = document.getElementById('riskLevel').value;
             const detail = document.getElementById('dangerDetails').value;
             const imageFile = document.getElementById('dangerImage').files[0];
 
             if(!title || !detail) {
-                showAlert('warning', 'ข้อมูลไม่ครบ', 'กรุณากรอกข้อมูลให้ครบถ้วนครับ');
+                showAlert('warning', 'ข้อมูลไม่ครบ', 'กรุณากรอกชื่อสถานที่และรายละเอียดปัญหาให้ครบถ้วนครับ');
                 return;
             }
 
@@ -537,18 +540,18 @@
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                         
                         const compressedImage = canvas.toDataURL('image/jpeg', 0.7);
-                        saveDataToLocal(title, detail, compressedImage);
+                        saveDataToLocal(title, detail, risk, compressedImage);
                     };
                     img.src = event.target.result;
                 };
                 reader.readAsDataURL(imageFile);
             } else {
-                saveDataToLocal(title, detail, null);
+                saveDataToLocal(title, detail, risk, null);
             }
         }
 
-        function saveDataToLocal(title, detail, imageUrl) {
-            const newPin = { lat: currentLatLng.lat, lng: currentLatLng.lng, title: title, detail: detail, image: imageUrl };
+        function saveDataToLocal(title, detail, risk, imageUrl) {
+            const newPin = { lat: currentLatLng.lat, lng: currentLatLng.lng, title: title, detail: detail, risk: risk, image: imageUrl };
             savedPins.push(newPin);
             
             try {
@@ -561,26 +564,25 @@
 
             if (tempMarker) map.removeLayer(tempMarker);
             
-            let popupContent = `<h3>⚠️ ${title}</h3><p>${detail}</p>`;
+            let badgeHtml = '';
+            if(risk === 'high') badgeHtml = '<span class="risk-badge risk-high">🔴 ความเสี่ยงสูง</span>';
+            else if(risk === 'medium') badgeHtml = '<span class="risk-badge risk-medium">🟠 ความเสี่ยงปานกลาง</span>';
+            else badgeHtml = '<span class="risk-badge risk-low">🟡 ความเสี่ยงน้อย</span>';
+
+            let popupContent = `${badgeHtml}<h3>${title}</h3><p>${detail}</p>`;
             if(imageUrl) {
                 popupContent += `<img src="${imageUrl}" class="popup-image">`;
             }
 
-            L.marker(currentLatLng, {icon: dangerIcon}).addTo(map)
+            L.marker([currentLatLng.lat, currentLatLng.lng], {icon: icons[risk]}).addTo(map)
              .bindPopup(popupContent).openPopup();
 
             document.getElementById('total-pins').innerText = savedPins.length;
             
-            showAlert('success', 'บันทึกสำเร็จ!', 'ขอบคุณที่ร่วมแจ้งจุดเสี่ยง ข้อมูลและรูปภาพของคุณจะช่วยเตือนสติเพื่อนๆ ในชุมชนครับ');
+            showAlert('success', 'บันทึกสำเร็จ!', 'ขอบคุณที่ร่วมแจ้งจุดเสี่ยง ข้อมูลและรูปภาพของคุณถูกบันทึกลงแผนเรียบร้อยครับ');
             
-            hideForm();
-        }
-
-        function hideForm() {
-            document.getElementById('report-form-container').style.display = 'none';
-            document.getElementById('locationName').value = '';
-            document.getElementById('dangerDetails').value = '';
-            document.getElementById('dangerImage').value = ''; 
+            // รีเซ็ตฟอร์ม
+            cancelPin();
         }
     </script>
 </body>
