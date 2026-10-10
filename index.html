@@ -277,7 +277,7 @@
             'high': makeRiskIcon('#d32f2f'),   
             'medium': makeRiskIcon('#f57c00'), 
             'low': makeRiskIcon('#fbc02d'),
-            'pending': makeRiskIcon('#757575') // 🔴 สีเทาสำหรับสถานะรอตรวจสอบ 🔴
+            'pending': makeRiskIcon('#757575') 
         };
         
         const tempIcon = L.icon({ 
@@ -289,7 +289,6 @@
 
         let currentMarkers = []; let globalPinData = {}; 
 
-        // 🔴 โหลดแสดงหมุดทั้งที่ approved และ pending (pending จะแสดงเป็นสีเทา) 🔴
         db.ref('safeZonePins').on('value', (snapshot) => {
             currentMarkers.forEach(marker => map.removeLayer(marker));
             currentMarkers = []; globalPinData = snapshot.val() || {};
@@ -301,7 +300,7 @@
                 
                 let markerIcon;
                 if (pin.status === 'pending') {
-                    markerIcon = icons['pending']; // แสดงสีเทา
+                    markerIcon = icons['pending']; 
                 } else if (pin.status === 'approved') {
                     markerIcon = icons[pin.risk] || icons['medium'];
                     if (pin.risk === 'high') highCount++;
@@ -309,7 +308,7 @@
                     else if (pin.risk === 'low') lowCount++;
                     totalCount++;
                 } else {
-                    return; // ถ้าสถานะอื่นๆ ข้ามไป
+                    return; 
                 }
 
                 const newMarker = L.marker([pin.lat, pin.lng], {icon: markerIcon});
@@ -354,7 +353,6 @@
             const delContainer = document.getElementById('pd-delete-container');
             if (pin.creatorId === myDeviceId) { delContainer.innerHTML = `<button style="width:100%; background-color:#d32f2f; margin-top:10px;" onclick="confirmDeletePin('${pinKey}')">🗑️ ลบหมุดของฉัน</button>`; } else { delContainer.innerHTML = ''; }
             
-            // เปิดคอมเมนต์เฉพาะอันที่อนุมัติแล้ว
             if (pin.status === 'approved') {
                 db.ref(`safeZonePins/${pinKey}/comments`).on('value', renderComments);
                 document.querySelector('.comment-section').style.display = 'block';
@@ -466,6 +464,23 @@
                 creatorId: myDeviceId, status: 'pending' 
             })
             .then(() => { 
+                // 🔴 เชื่อมต่อ Discord Webhook ที่เตอร์ให้มา 🔴
+                const webhookURL = "https://discord.com/api/webhooks/1558465611447673033/4DlEWJrja1iCsBThuOyqCYcgxfRQM4xXJVlu9VToC36EPM5ZCYirC6yalRqVdNACNX9r";
+                
+                let riskEmoji = "🟠 ปานกลาง";
+                if(risk === 'high') riskEmoji = "🔴 ความเสี่ยงสูง";
+                if(risk === 'low') riskEmoji = "🟡 ความเสี่ยงน้อย";
+
+                const discordMessage = {
+                    content: `🚨 **มีผู้แจ้งจุดเสี่ยงใหม่เข้ามา!** (รอแอดมินตรวจสอบ)\n📌 **สถานที่:** ${title}\n⚠️ **ระดับความเสี่ยง:** ${riskEmoji}\n📝 **รายละเอียด:** ${detail}`
+                };
+
+                fetch(webhookURL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(discordMessage)
+                }).catch(err => console.log("Discord notify error:", err));
+
                 closeFormModal(); 
                 showAlert('success', 'ส่งเรื่องสำเร็จ!', 'หมุดของคุณขึ้นบนแผนที่แล้วในสถานะ "รอตรวจสอบ" (สีเทา) จะเปลี่ยนเป็นสีตามระดับความเสี่ยงเมื่อแอดมินอนุมัติครับ'); 
                 cancelPin(); 
