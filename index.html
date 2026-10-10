@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ปักหมุดจุดเสี่ยง (Safe Zone Mapping)</title>
+    
+    <!-- ฟอนต์ภาษาไทย -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- โหลด Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        header {
+            background-color: #d32f2f;
+            color: white;
+            text-align: center;
+            padding: 1.5rem 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 { margin: 0; font-size: 1.8rem; }
+        p.subtitle { margin: 0.5rem 0 0 0; font-size: 1rem; opacity: 0.9; }
+        
+        main {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        
+        .stats-panel {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            flex: 1;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #d32f2f;
+            margin-top: 10px;
+        }
+
+        .instructions {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 5px solid #d32f2f;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-size: 1.1rem;
+        }
+
+        #map { 
+            height: 500px; 
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            z-index: 1; 
+        }
+
+        #report-form-container {
+            display: none; 
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            border-top: 4px solid #d32f2f;
+        }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        
+        button {
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-family: inherit;
+            font-weight: bold;
+        }
+        button:hover { background-color: #b71c1c; }
+        button.cancel { background-color: #757575; margin-left: 10px; }
+        button.cancel:hover { background-color: #616161; }
+        
+        .leaflet-popup-content h3 { margin: 0 0 5px 0; color: #d32f2f; font-size: 1.1rem; }
+        .leaflet-popup-content p { margin: 0; color: #555; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>📍 ปักหมุดจุดเสี่ยง (Safe Zone Mapping)</h1>
+        <p class="subtitle">เมาไม่ขับ กลับให้ถึง - อำเภอธัญบุรี</p>
+    </header>
+
+    <main>
+        <div class="stats-panel">
+            <div class="stat-card">
+                <div>จุดเสี่ยงที่รับแจ้งทั้งหมด</div>
+                <div class="stat-number" id="total-pins">0</div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <strong>📢 วิธีร่วมกิจกรรม:</strong> 
+            <b>คลิกบนแผนที่</b> ในบริเวณที่เป็น "จุดเสี่ยง" (เช่น ทางมืด, เกิดอุบัติเหตุบ่อย) เพื่อจำลองการแจ้งพิกัด
+        </div>
+
+        <div id="map"></div>
+
+        <div id="report-form-container">
+            <h3 style="margin-top:0; color:#d32f2f;">แจ้งข้อมูลจุดเสี่ยงบริเวณนี้</h3>
+            <p style="font-size: 0.9rem; color: #666;">พิกัด: <span id="display-latlng"></span></p>
+            
+            <div class="form-group">
+                <label for="locationName">ชื่อสถานที่ / จุดสังเกต</label>
+                <input type="text" id="locationName" placeholder="เช่น หน้าปากซอย...">
+            </div>
+            
+            <div class="form-group">
+                <label for="dangerDetails">รายละเอียดปัญหา</label>
+                <textarea id="dangerDetails" rows="3" placeholder="เช่น ไฟถนนเสีย ชอบมีคนเมาขับรถเร็ว"></textarea>
+            </div>
+            
+            <button onclick="savePin()">📌 ปักหมุดบันทึกข้อมูล</button>
+            <button class="cancel" onclick="cancelPin()">ยกเลิก</button>
+        </div>
+    </main>
+
+    <!-- โหลด Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    
+    <script>
+        // 1. ตั้งค่าแผนที่เริ่มต้นที่ มทร.ธัญบุรี
+        const map = L.map('map').setView([14.0366, 100.7300], 14);
+        
+        // --- เปลี่ยนมาใช้แผนที่ของ ESRI ที่ฟรีและไม่ต้องใช้ API Key ---
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 19,
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, iPC, NAVTEQ, USGS, Intermap, METI, NRCAN, Esri Japan'
+        }).addTo(map);
+        // -------------------------------------------------------------
+
+        // 2. ไอคอนหมุดสีแดง
+        const dangerIcon = L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
+
+        // 3. ระบบ Database จำลองด้วย LocalStorage
+        let savedPins = JSON.parse(localStorage.getItem('safeZonePins')) || [];
+        
+        // ข้อมูล Seed Data เริ่มต้น (มีไว้กันเว็บโล่ง)
+        const seedPins = [
+            { lat: 14.0385, lng: 100.7280, title: "โค้งอันตราย", detail: "มืดมาก ชอบมีรถขับแหกโค้งดึกๆ" },
+            { lat: 14.0320, lng: 100.7350, title: "จุดกลับรถ", detail: "ช่วงดึกมักมีคนเมาขับรถฝ่าไฟกลับรถ" }
+        ];
+
+        // โหลดหมุดทั้งหมดขึ้นแผนที่
+        function renderPins() {
+            // โหลด Seed Data
+            seedPins.forEach(pin => {
+                L.marker([pin.lat, pin.lng], {icon: dangerIcon}).addTo(map)
+                 .bindPopup(`<h3>⚠️ ${pin.title}</h3><p>${pin.detail}</p>`);
+            });
+            
+            // โหลดข้อมูลที่ผู้ใช้ User ปักเพิ่มจาก LocalStorage
+            savedPins.forEach(pin => {
+                L.marker([pin.lat, pin.lng], {icon: dangerIcon}).addTo(map)
+                 .bindPopup(`<h3>⚠️ ${pin.title}</h3><p>${pin.detail}</p>`);
+            });
+
+            // อัปเดตตัวเลข
+            document.getElementById('total-pins').innerText = seedPins.length + savedPins.length;
+        }
+        renderPins();
+
+        // 4. การทำงานตอนคลิกแผนที่
+        let tempMarker = null; 
+        let currentLatLng = null;
+
+        map.on('click', function(e) {
+            currentLatLng = e.latlng;
+            if (tempMarker) map.removeLayer(tempMarker);
+            
+            tempMarker = L.marker(currentLatLng).addTo(map); // หมุดชั่วคราวสีฟ้า
+            
+            document.getElementById('report-form-container').style.display = 'block';
+            document.getElementById('display-latlng').innerText = `${currentLatLng.lat.toFixed(4)}, ${currentLatLng.lng.toFixed(4)}`;
+            document.getElementById('report-form-container').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        function cancelPin() {
+            if (tempMarker) map.removeLayer(tempMarker);
+            hideForm();
+        }
+
+        // 5. บันทึกข้อมูลลง LocalStorage
+        function savePin() {
+            const title = document.getElementById('locationName').value;
+            const detail = document.getElementById('dangerDetails').value;
+
+            if(!title || !detail) {
+                alert("กรุณากรอกข้อมูลให้ครบถ้วนครับ");
+                return;
+            }
+
+            // นำข้อมูลใหม่ Push เข้า Array และเซฟลง LocalStorage
+            const newPin = { lat: currentLatLng.lat, lng: currentLatLng.lng, title: title, detail: detail };
+            savedPins.push(newPin);
+            localStorage.setItem('safeZonePins', JSON.stringify(savedPins));
+
+            if (tempMarker) map.removeLayer(tempMarker); // ลบสีฟ้า
+            
+            // วาดหมุดสีแดงอันใหม่ลงไป
+            L.marker(currentLatLng, {icon: dangerIcon}).addTo(map)
+             .bindPopup(`<h3>⚠️ ${title}</h3><p>${detail}</p>`).openPopup();
+
+            document.getElementById('total-pins').innerText = seedPins.length + savedPins.length;
+            hideForm();
+        }
+
+        function hideForm() {
+            document.getElementById('report-form-container').style.display = 'none';
+            document.getElementById('locationName').value = '';
+            document.getElementById('dangerDetails').value = '';
+        }
+    </script>
+</body>
+</html>
