@@ -33,14 +33,13 @@
         .instructions { background: white; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #d32f2f; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-size: 1rem; }
         
         .action-tools { display: flex; gap: 10px; margin-bottom: 15px; }
-        .btn-tool { flex: 1; padding: 10px; border: none; border-radius: 6px; font-family: inherit; font-size: 0.95rem; font-weight: bold; color: white; cursor: pointer; transition: 0.3s; }
+        .btn-tool { flex: 1; padding: 10px; border: none; border-radius: 6px; font-family: inherit; font-size: 0.95rem; font-weight: bold; color: white; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-tool.gps { background-color: #1976d2; } .btn-tool.gps:hover { background-color: #1565c0; }
-        .btn-tool.heat { background-color: #ff9800; } .btn-tool.heat:hover { background-color: #f57c00; }
 
         .search-container { position: relative; display: flex; gap: 10px; margin-bottom: 15px; }
         .search-container input { flex: 1; padding: 10px 12px; border: 2px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 1rem; }
-        .search-container button.btn-search { background-color: #1976d2; color: white; border: none; border-radius: 6px; padding: 0 15px; cursor: pointer; }
-        .autocomplete-items { position: absolute; top: 100%; left: 0; right: 80px; border: 1px solid #d4d4d4; background-color: #fff; max-height: 250px; overflow-y: auto; z-index: 999; }
+        .search-container button.btn-search { background-color: #1976d2; color: white; border: none; border-radius: 6px; padding: 0 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; min-width: 80px; }
+        .autocomplete-items { position: absolute; top: 100%; left: 0; right: 90px; border: 1px solid #d4d4d4; background-color: #fff; max-height: 250px; overflow-y: auto; z-index: 999; border-radius: 0 0 6px 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .autocomplete-items div { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; }
         .autocomplete-items div:hover { background-color: #f1f1f1; }
         
@@ -80,9 +79,23 @@
         .comment-input-row { display: flex; gap: 8px; }
         .comment-input-row input[type="text"] { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; }
         .comment-input-row button { background-color: #1976d2; border: none; color: white; padding: 8px 15px; border-radius: 6px; cursor: pointer; }
+
+        /* 🔴 CSS สำหรับ Toast Notification และ Spinner */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { background: white; color: #333; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; font-weight: bold; font-family: 'Sarabun', sans-serif; transform: translateX(120%); transition: transform 0.3s ease-out; border-left: 5px solid #1976d2; pointer-events: auto; }
+        .toast.show { transform: translateX(0); }
+        .toast.success { border-left-color: #4caf50; }
+        .toast.error { border-left-color: #d32f2f; }
+        .toast.info { border-left-color: #1976d2; }
+        
+        .spinner { border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; border-top: 3px solid white; width: 16px; height: 16px; animation: spin 1s linear infinite; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
+
+    <!-- 🔴 Container สำหรับ Toast Notification -->
+    <div id="toast-container"></div>
 
     <header>
         <h1>📍 แผนที่จุดเฝ้าระวังภัย (Safe Zone Mapping)</h1>
@@ -103,15 +116,19 @@
             <strong>📢 คำแนะนำ:</strong> เลื่อนดูแผนที่และคลิกหมุดเพื่อตรวจสอบจุดเสี่ยง (หมุดสีเทา = รอแอดมินตรวจ) หรือคลิก <b>"➕ แจ้งจุดเสี่ยง"</b>
         </div>
 
-        <!-- 🔴 ฟีเจอร์ใหม่: ค้นหา GPS และ แผนที่ความร้อน -->
         <div class="action-tools">
-            <button class="btn-tool gps" onclick="getLocation()">📍 ค้นหาตำแหน่งของฉัน (GPS)</button>
-            <button class="btn-tool heat" onclick="toggleHeatmap()">🔥 เปิด/ปิด แผนที่ความร้อน</button>
+            <button class="btn-tool gps" id="btn-gps" onclick="getLocation()">
+                <div class="spinner" id="gps-spinner"></div>
+                <span>📍 ค้นหาตำแหน่งของฉัน (GPS)</span>
+            </button>
         </div>
 
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="🔍 ค้นหาสถานที่, ซอย (เช่น ตลาดพรธิสาร)" oninput="handleInput(event)" onkeypress="handleEnter(event)" autocomplete="off">
-            <button class="btn-search" onclick="searchLocation()">ค้นหา</button>
+            <button class="btn-search" id="btn-search-action" onclick="searchLocation()">
+                <div class="spinner" id="search-spinner"></div>
+                <span id="search-text">ค้นหา</span>
+            </button>
             <div id="searchResults" class="autocomplete-items"></div>
         </div>
 
@@ -120,6 +137,7 @@
 
     <button class="fab-btn" onclick="openFormModal()">➕ แจ้งจุดเสี่ยง</button>
 
+    <!-- Modal Form -->
     <div id="formModal" class="modal-overlay">
         <div class="modal-box">
             <button class="close-btn" onclick="closeFormModal()">✖</button>
@@ -145,6 +163,7 @@
         </div>
     </div>
 
+    <!-- Modal Pin Details -->
     <div id="pinDetailsModal" class="modal-overlay" style="z-index: 2000;">
         <div class="modal-box">
             <button class="close-btn" onclick="closePinDetails()">✖</button>
@@ -154,7 +173,6 @@
             <p id="pd-detail" style="color: #555; margin-top: 0; line-height: 1.4; font-size: 0.95rem;"></p>
             <img id="pd-img" class="pin-img-preview" src="" style="display: none;">
             
-            <!-- 🔴 ฟีเจอร์ใหม่: ปุ่มแชร์ลง Social -->
             <div class="share-group">
                 <button class="share-btn share-line" onclick="shareLine()">📱 แชร์ลง LINE</button>
                 <button class="share-btn share-fb" onclick="shareFacebook()">📘 แชร์ลง Facebook</button>
@@ -166,7 +184,6 @@
                 <h4 style="margin: 0 0 8px 0; color: #1976d2;">💬 คอมเมนต์ / อัปเดตสถานการณ์</h4>
                 <div id="pd-comment-list" class="comment-list"></div>
                 <div class="comment-input-wrapper">
-                    <!-- 🔴 ฟีเจอร์ใหม่: ปุ่มเลือกรูปในคอมเมนต์ -->
                     <input type="file" id="pd-comment-img" accept="image/*" style="font-size: 0.8rem;">
                     <div class="comment-input-row">
                         <input type="text" id="pd-comment-input" placeholder="พิมพ์ข้อความ..." onkeypress="if(event.key==='Enter') submitComment()">
@@ -177,9 +194,8 @@
         </div>
     </div>
 
-    <!-- โหลด Leaflet & Heatmap Plugin -->
+    <!-- Load Leaflet -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -193,6 +209,23 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+
+        // 🔴 ฟังก์ชันแสดง Toast Notification
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            let icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
 
         let myDeviceId = localStorage.getItem('safeZoneDeviceId') || ('device_' + Math.random().toString(36).substr(2, 9));
         localStorage.setItem('safeZoneDeviceId', myDeviceId);
@@ -215,7 +248,6 @@
         const tempIcon = L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png', iconSize: [25, 41], iconAnchor: [12, 41] });
 
         let currentMarkers = []; let globalPinData = {}; 
-        let heatLayer = null; let isHeatmapOn = false; // สำหรับแผนที่ความร้อน
 
         db.ref('safeZonePins').on('value', (snapshot) => {
             currentMarkers.forEach(m => map.removeLayer(m));
@@ -233,41 +265,46 @@
             });
             document.getElementById('count-total').innerText = t; document.getElementById('count-high').innerText = h;
             document.getElementById('count-medium').innerText = m; document.getElementById('count-low').innerText = l;
-
-            // รีเฟรชแผนที่ความร้อนถ้าเปิดอยู่
-            if (isHeatmapOn) { toggleHeatmap(true); toggleHeatmap(true); } 
         });
 
-        // 🔴 ฟังก์ชันแผนที่ความร้อน
-        function toggleHeatmap(forceReload = false) {
-            if (isHeatmapOn && !forceReload) {
-                map.removeLayer(heatLayer); isHeatmapOn = false;
-            } else {
-                if (heatLayer) map.removeLayer(heatLayer);
-                let heatPoints = [];
-                Object.values(globalPinData).forEach(pin => {
-                    if (pin.status === 'approved') {
-                        let intensity = pin.risk === 'high' ? 1.0 : (pin.risk === 'medium' ? 0.6 : 0.3);
-                        heatPoints.push([pin.lat, pin.lng, intensity]);
-                    }
-                });
-                heatLayer = L.heatLayer(heatPoints, {radius: 25, blur: 15, maxZoom: 15}).addTo(map);
-                isHeatmapOn = true;
-            }
-        }
-
-        // 🔴 ฟังก์ชันค้นหา GPS
+        // 🔴 ฟังก์ชันค้นหา GPS พร้อม UI โหลด
         function getLocation() {
             if (navigator.geolocation) {
-                alert('⏳ ระบบกำลังค้นหาตำแหน่ง GPS ของคุณ...');
-                map.locate({setView: true, maxZoom: 16});
-            } else { alert("เบราว์เซอร์ไม่รองรับ GPS"); }
+                const btn = document.getElementById('btn-gps');
+                const spinner = document.getElementById('gps-spinner');
+                const span = btn.querySelector('span');
+                
+                spinner.style.display = 'inline-block';
+                span.innerText = ' กำลังค้นหา...';
+                btn.disabled = true;
+
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const latlng = {lat: position.coords.latitude, lng: position.coords.longitude};
+                        map.flyTo(latlng, 16, {animate: true, duration: 1.5});
+                        
+                        if (tempMarker) map.removeLayer(tempMarker);
+                        tempMarker = L.marker(latlng, {icon: tempIcon}).addTo(map); 
+                        currentLatLng = latlng;
+                        document.getElementById('display-latlng').innerHTML = `📍 พิกัดที่เลือก: <span style="color:#1976d2;">${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}</span>`;
+                        
+                        spinner.style.display = 'none';
+                        span.innerText = '📍 ค้นหาตำแหน่งของฉัน (GPS)';
+                        btn.disabled = false;
+                        showToast('ค้นหาตำแหน่งของคุณสำเร็จแล้ว', 'success');
+                    },
+                    (error) => {
+                        spinner.style.display = 'none';
+                        span.innerText = '📍 ค้นหาตำแหน่งของฉัน (GPS)';
+                        btn.disabled = false;
+                        showToast('ไม่สามารถดึงตำแหน่ง GPS ได้ กรุณาอนุญาตการเข้าถึงตำแหน่ง', 'error');
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            } else { 
+                showToast('เบราว์เซอร์ไม่รองรับ GPS', 'error'); 
+            }
         }
-        map.on('locationfound', function(e) {
-            if (tempMarker) map.removeLayer(tempMarker);
-            tempMarker = L.marker(e.latlng, {icon: tempIcon}).addTo(map); currentLatLng = e.latlng;
-            document.getElementById('display-latlng').innerHTML = `📍 พิกัดที่เลือก: <span style="color:#1976d2;">${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}</span>`;
-        });
 
         let currentActivePinKey = null; 
         function openPinDetails(pinKey) {
@@ -293,7 +330,6 @@
             if (s.val()) {
                 Object.values(s.val()).forEach(c => {
                     let d = document.createElement('div'); d.className = 'comment-item';
-                    // 🔴 โชว์รูปในคอมเมนต์ถ้ามี 🔴
                     let imgHtml = c.image ? `<br><img src="${c.image}" style="max-width:150px; border-radius:4px; margin-top:5px; border:1px solid #ddd;">` : '';
                     d.innerHTML = `<span class="comment-time">🕒 ${new Date(c.timestamp).toLocaleString('th-TH')}</span><b>${c.text}</b> ${imgHtml}`;
                     listEl.appendChild(d);
@@ -301,7 +337,6 @@
             } else listEl.innerHTML = '<div style="text-align:center; color:#999; font-size:0.85rem;">ยังไม่มีคอมเมนต์ ถ่ายรูปอัปเดตสิ!</div>';
         }
 
-        // 🔴 ฟังก์ชันคอมเมนต์พร้อมรูปภาพ
         function submitComment() {
             const text = document.getElementById('pd-comment-input').value.trim();
             const file = document.getElementById('pd-comment-img').files[0];
@@ -322,26 +357,51 @@
         function saveCommentToDB(text, imgUrl) {
             db.ref(`safeZonePins/${currentActivePinKey}/comments`).push({ text: text, image: imgUrl, timestamp: Date.now() });
             document.getElementById('pd-comment-input').value = ''; document.getElementById('pd-comment-img').value = '';
+            showToast('ส่งคอมเมนต์สำเร็จ', 'success');
         }
 
-        function deleteMyPin(k) { if(confirm('ลบหมุดนี้?')) { db.ref('safeZonePins/'+k).remove(); closePinDetails(); } }
+        function deleteMyPin(k) { if(confirm('ลบหมุดนี้?')) { db.ref('safeZonePins/'+k).remove(); closePinDetails(); showToast('ลบหมุดสำเร็จ', 'success'); } }
 
-        // 🔴 ฟังก์ชันแชร์ Social
         function shareLine() { window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(window.location.href)}&text=ระวังจุดเสี่ยง: ${document.getElementById('pd-title').innerText}`, '_blank'); }
         function shareFacebook() { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank'); }
 
         let searchTimeout = null; 
         function handleInput(e) { clearTimeout(searchTimeout); searchTimeout = setTimeout(searchLocation, 600); }
         function handleEnter(e) { if(e.key==='Enter') searchLocation(); }
+        
+        // 🔴 ฟังก์ชันค้นหาสถานที่ พร้อม UI โหลด
         async function searchLocation() {
             const q = document.getElementById('searchInput').value; if(!q || q.length<3) return;
-            const data = await (await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=th&viewbox=100.58,14.09,100.90,13.94&bounded=1&limit=5`)).json();
-            const res = document.getElementById('searchResults'); res.innerHTML = '';
-            data.forEach(i => {
-                const d = document.createElement('div'); d.innerHTML = `<b>${i.name}</b> <span style="font-size:0.8em;color:#666">${i.display_name}</span>`;
-                d.onclick = () => { map.flyTo([i.lat, i.lon], 16); res.innerHTML=''; document.getElementById('searchInput').value=i.name; };
-                res.appendChild(d);
-            });
+            
+            const btn = document.getElementById('btn-search-action');
+            const spinner = document.getElementById('search-spinner');
+            const textSpan = document.getElementById('search-text');
+            
+            spinner.style.display = 'inline-block';
+            textSpan.style.display = 'none';
+            btn.disabled = true;
+
+            try {
+                const data = await (await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=th&viewbox=100.58,14.09,100.90,13.94&bounded=1&limit=5`)).json();
+                const res = document.getElementById('searchResults'); res.innerHTML = '';
+                
+                if (data.length > 0) {
+                    data.forEach(i => {
+                        const d = document.createElement('div'); d.innerHTML = `<b>${i.name}</b> <span style="font-size:0.8em;color:#666">${i.display_name}</span>`;
+                        d.onclick = () => { map.flyTo([i.lat, i.lon], 16, {animate: true, duration: 1.5}); res.innerHTML=''; document.getElementById('searchInput').value=i.name; showToast(`พบสถานที่: ${i.name}`, 'success'); };
+                        res.appendChild(d);
+                    });
+                    showToast('ค้นหาสถานที่สำเร็จ เลื่อนดูตัวเลือกด้านล่าง', 'success');
+                } else {
+                    showToast('ไม่พบสถานที่ที่ค้นหาในเขตธัญบุรี', 'error');
+                }
+            } catch (err) {
+                showToast('เกิดข้อผิดพลาดในการค้นหา', 'error');
+            } finally {
+                spinner.style.display = 'none';
+                textSpan.style.display = 'inline';
+                btn.disabled = false;
+            }
         }
 
         let tempMarker = null; let currentLatLng = null;
@@ -353,9 +413,9 @@
         function cancelPin() { if(tempMarker) map.removeLayer(tempMarker); currentLatLng = null; document.getElementById('display-latlng').innerText="📍 สถานะพิกัด: ยังไม่ได้เลือกพิกัด"; document.getElementById('locationName').value=''; document.getElementById('dangerDetails').value=''; document.getElementById('dangerImage').value=''; }
 
         function processAndSavePin() {
-            if(!currentLatLng) return alert('คลิกบนแผนที่เพื่อระบุตำแหน่งก่อนครับ');
+            if(!currentLatLng) { showToast('คลิกบนแผนที่เพื่อระบุตำแหน่งก่อนครับ', 'error'); return; }
             const title = document.getElementById('locationName').value; const detail = document.getElementById('dangerDetails').value;
-            if(!title || !detail) return alert('กรอกชื่อและรายละเอียดให้ครบครับ');
+            if(!title || !detail) { showToast('กรอกชื่อและรายละเอียดให้ครบครับ', 'error'); return; }
             const file = document.getElementById('dangerImage').files[0];
 
             if(file) {
@@ -376,7 +436,7 @@
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ content: `🚨 **แจ้งจุดเสี่ยงใหม่!**\n📌 สถานที่: ${title}\n⚠️ ความเสี่ยง: ${risk==='high'?'🔴สูง':risk==='medium'?'🟠ปานกลาง':'🟡น้อย'}\n📝 ปัญหา: ${detail}` })
                 });
-                alert('ส่งข้อมูลสำเร็จ! รอแอดมินตรวจสอบครับ'); closeFormModal(); cancelPin();
+                showToast('ส่งข้อมูลสำเร็จ! รอแอดมินตรวจสอบครับ', 'success'); closeFormModal(); cancelPin();
             });
         }
     </script>
