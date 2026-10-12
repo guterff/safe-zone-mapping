@@ -32,12 +32,16 @@
         .visitor-counter-mini { text-align: right; font-size: 0.8rem; color: #777; margin-bottom: 10px; }
         .instructions { background: white; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #d32f2f; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-size: 1rem; }
         
+        .action-tools { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn-tool { flex: 1; padding: 10px; border: none; border-radius: 6px; font-family: inherit; font-size: 0.95rem; font-weight: bold; color: white; cursor: pointer; transition: 0.3s; }
+        .btn-tool.gps { background-color: #1976d2; } .btn-tool.gps:hover { background-color: #1565c0; }
+        .btn-tool.heat { background-color: #ff9800; } .btn-tool.heat:hover { background-color: #f57c00; }
+
         .search-container { position: relative; display: flex; gap: 10px; margin-bottom: 15px; }
         .search-container input { flex: 1; padding: 10px 12px; border: 2px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 1rem; }
-        .search-container input:focus { border-color: #d32f2f; outline: none; }
-        .search-container button.btn-search { background-color: #1976d2; }
-        .autocomplete-items { position: absolute; top: 100%; left: 0; right: 80px; border: 1px solid #d4d4d4; border-top: none; z-index: 999; background-color: #fff; max-height: 250px; overflow-y: auto; border-radius: 0 0 6px 6px; }
-        .autocomplete-items div { padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 0.95rem; }
+        .search-container button.btn-search { background-color: #1976d2; color: white; border: none; border-radius: 6px; padding: 0 15px; cursor: pointer; }
+        .autocomplete-items { position: absolute; top: 100%; left: 0; right: 80px; border: 1px solid #d4d4d4; background-color: #fff; max-height: 250px; overflow-y: auto; z-index: 999; }
+        .autocomplete-items div { padding: 10px; cursor: pointer; border-bottom: 1px solid #eee; }
         .autocomplete-items div:hover { background-color: #f1f1f1; }
         
         #map { height: 500px; width: 100%; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-bottom: 15px; border: 2px solid #ddd; z-index: 1; }
@@ -46,48 +50,36 @@
             position: fixed; bottom: 25px; right: 25px; background-color: #d32f2f; color: white;
             border: none; border-radius: 30px; padding: 12px 22px; font-size: 1.05rem; font-weight: bold;
             box-shadow: 0 4px 15px rgba(211,47,47,0.4); cursor: pointer; z-index: 1500; display: flex; align-items: center; gap: 8px;
-            transition: 0.3s; font-family: 'Sarabun', sans-serif;
         }
-        .fab-btn:hover { background-color: #b71c1c; transform: scale(1.05); }
 
-        .form-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: 2500; align-items: center; justify-content: center; padding: 15px; }
-        .form-modal-box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2500; align-items: center; justify-content: center; padding: 15px; }
+        .modal-box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; position: relative; }
+        .close-btn { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5rem; color: #888; cursor: pointer; }
         
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.95rem; }
-        .form-group input[type="text"], .form-group textarea, .form-group select { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: inherit; font-size: 0.95rem; }
-        .form-group input[type="file"] { width: 100%; padding: 6px; border: 1px dashed #d32f2f; border-radius: 4px; background-color: #fafafa; cursor: pointer; }
-        
-        button { background-color: #d32f2f; color: white; border: none; padding: 9px 18px; border-radius: 6px; cursor: pointer; font-size: 0.95rem; font-family: inherit; font-weight: bold; transition: 0.3s; }
-        button:hover { background-color: #b71c1c; }
-        button.cancel { background-color: #757575; margin-left: 8px; }
+        .form-group input[type="text"], .form-group textarea, .form-group select { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; box-sizing: border-box; }
+        .form-group input[type="file"] { width: 100%; padding: 6px; border: 1px dashed #d32f2f; background-color: #fafafa; }
+        button.btn-primary { background-color: #d32f2f; color: white; border: none; padding: 9px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button.btn-gray { background-color: #757575; color: white; border: none; padding: 9px 18px; border-radius: 6px; cursor: pointer; }
 
         .risk-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; color: white; font-size: 0.9rem; font-weight: bold; }
-        .risk-high { background-color: #d32f2f; } .risk-medium { background-color: #f57c00; } .risk-low { background-color: #fbc02d; color: #333; } 
-        .risk-pending { background-color: #757575; }
+        .risk-high { background-color: #d32f2f; } .risk-medium { background-color: #f57c00; } .risk-low { background-color: #fbc02d; color: #333; } .risk-pending { background-color: #757575; }
 
-        .pin-modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: 2000; align-items: center; justify-content: center; padding: 15px; }
-        .pin-modal-box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative; }
-        .close-btn { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 1.5rem; color: #888; cursor: pointer; padding: 0; }
         .pin-img-preview { width: 100%; max-height: 220px; object-fit: cover; border-radius: 8px; margin: 12px 0; border: 1px solid #ddd; }
         
+        .share-group { display: flex; gap: 8px; margin-top: 10px; }
+        .share-btn { padding: 6px 12px; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
+        .share-line { background-color: #00b900; } .share-fb { background-color: #1877f2; }
+
         .comment-section { background-color: #f9f9f9; padding: 12px; border-radius: 8px; margin-top: 12px; border: 1px solid #eee; }
         .comment-list { max-height: 180px; overflow-y: auto; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
         .comment-item { background: white; padding: 8px 10px; border-radius: 6px; border-left: 4px solid #1976d2; font-size: 0.9rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .comment-time { font-size: 0.75rem; color: #888; display: block; margin-bottom: 2px; }
-        .comment-input-group { display: flex; gap: 8px; }
-        .comment-input-group input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; font-size: 0.9rem; }
-        .comment-input-group button { background-color: #1976d2; padding: 8px 12px; }
-
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 3000; align-items: center; justify-content: center; }
-        .modal-box { background: white; padding: 25px 30px; border-radius: 12px; text-align: center; max-width: 400px; width: 80%; }
-        .modal-icon { font-size: 3rem; margin-bottom: 15px; }
-        .icon-warning { color: #f57c00; } .icon-success { color: #4caf50; } .icon-error { color: #d32f2f; } .icon-question { color: #1976d2; }
-        .modal-title { font-size: 1.4rem; font-weight: bold; margin: 0 0 10px 0; color: #333; }
-        .modal-text { font-size: 1rem; color: #555; margin-bottom: 20px; line-height: 1.5; }
-        .modal-btn-group { display: flex; gap: 10px; justify-content: center; }
-        .modal-btn { background-color: #1976d2; color: white; border: none; padding: 10px 25px; border-radius: 6px; font-size: 1.1rem; cursor: pointer; flex: 1; }
-        .btn-red { background-color: #d32f2f; } .btn-gray { background-color: #757575; }
+        .comment-input-wrapper { display: flex; flex-direction: column; gap: 8px; }
+        .comment-input-row { display: flex; gap: 8px; }
+        .comment-input-row input[type="text"] { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-family: inherit; }
+        .comment-input-row button { background-color: #1976d2; border: none; color: white; padding: 8px 15px; border-radius: 6px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -99,35 +91,26 @@
 
     <main>
         <div class="stats-panel">
-            <div class="stat-card total">
-                <div class="stat-label">ทั้งหมด</div>
-                <div class="stat-number" id="count-total">0</div>
-            </div>
-            <div class="stat-card high">
-                <div class="stat-label">🔴 เสี่ยงสูง</div>
-                <div class="stat-number" id="count-high">0</div>
-            </div>
-            <div class="stat-card medium">
-                <div class="stat-label">🟠 ปานกลาง</div>
-                <div class="stat-number" id="count-medium">0</div>
-            </div>
-            <div class="stat-card low">
-                <div class="stat-label">🟡 เสี่ยงน้อย</div>
-                <div class="stat-number" id="count-low">0</div>
-            </div>
+            <div class="stat-card total"><div class="stat-label">ทั้งหมด</div><div class="stat-number" id="count-total">0</div></div>
+            <div class="stat-card high"><div class="stat-label">🔴 เสี่ยงสูง</div><div class="stat-number" id="count-high">0</div></div>
+            <div class="stat-card medium"><div class="stat-label">🟠 ปานกลาง</div><div class="stat-number" id="count-medium">0</div></div>
+            <div class="stat-card low"><div class="stat-label">🟡 เสี่ยงน้อย</div><div class="stat-number" id="count-low">0</div></div>
         </div>
 
-        <div class="visitor-counter-mini">
-            👥 ผู้เข้าชมเว็บไซต์ทั้งหมด: <span id="total-visitors">0</span> คน
-        </div>
+        <div class="visitor-counter-mini">👥 ผู้เข้าชมเว็บไซต์ทั้งหมด: <span id="total-visitors">0</span> คน</div>
 
         <div class="instructions">
-            <strong>📢 คำแนะนำ:</strong> 
-            เลื่อนดูแผนที่และคลิกหมุดเพื่อตรวจสอบจุดเสี่ยง (หมุดสีเทา = อยู่ระหว่างรอแอดมินตรวจสอบ) หรือคลิกปุ่ม <b>"➕ แจ้งจุดเสี่ยง"</b> เพื่อรายงานเหตุ
+            <strong>📢 คำแนะนำ:</strong> เลื่อนดูแผนที่และคลิกหมุดเพื่อตรวจสอบจุดเสี่ยง (หมุดสีเทา = รอแอดมินตรวจ) หรือคลิก <b>"➕ แจ้งจุดเสี่ยง"</b>
+        </div>
+
+        <!-- 🔴 ฟีเจอร์ใหม่: ค้นหา GPS และ แผนที่ความร้อน -->
+        <div class="action-tools">
+            <button class="btn-tool gps" onclick="getLocation()">📍 ค้นหาตำแหน่งของฉัน (GPS)</button>
+            <button class="btn-tool heat" onclick="toggleHeatmap()">🔥 เปิด/ปิด แผนที่ความร้อน</button>
         </div>
 
         <div class="search-container">
-            <input type="text" id="searchInput" placeholder="🔍 ค้นหาสถานที่, ซอย, ตลาด (เช่น คลองหก, ตลาดพรธิสาร)" oninput="handleInput(event)" onkeypress="handleEnter(event)" autocomplete="off">
+            <input type="text" id="searchInput" placeholder="🔍 ค้นหาสถานที่, ซอย (เช่น ตลาดพรธิสาร)" oninput="handleInput(event)" onkeypress="handleEnter(event)" autocomplete="off">
             <button class="btn-search" onclick="searchLocation()">ค้นหา</button>
             <div id="searchResults" class="autocomplete-items"></div>
         </div>
@@ -137,74 +120,67 @@
 
     <button class="fab-btn" onclick="openFormModal()">➕ แจ้งจุดเสี่ยง</button>
 
-    <div id="formModal" class="form-modal-overlay">
-        <div class="form-modal-box">
+    <div id="formModal" class="modal-overlay">
+        <div class="modal-box">
             <button class="close-btn" onclick="closeFormModal()">✖</button>
             <h3 style="margin-top:0; color:#d32f2f;">📝 รายงานข้อมูลจุดเสี่ยง</h3>
-            <p style="font-size: 0.9rem; color: #d32f2f; font-weight: bold;" id="display-latlng">📍 สถานะพิกัด: ยังไม่ได้เลือก (กรุณาคลิกบนแผนที่ก่อน)</p>
+            <p style="font-size: 0.9rem; color: #d32f2f; font-weight: bold;" id="display-latlng">📍 สถานะพิกัด: ยังไม่ได้เลือกพิกัด</p>
             
+            <div class="form-group"><label>ชื่อสถานที่ / จุดสังเกต</label><input type="text" id="locationName"></div>
             <div class="form-group">
-                <label for="locationName">ชื่อสถานที่ / จุดสังเกต</label>
-                <input type="text" id="locationName" placeholder="เช่น หน้าปากซอย...">
-            </div>
-
-            <div class="form-group">
-                <label for="riskLevel">ระดับความเสี่ยง</label>
+                <label>ระดับความเสี่ยง</label>
                 <select id="riskLevel">
-                    <option value="high">🔴 ความเสี่ยงสูง (อันตรายมาก เกิดเหตุบ่อย)</option>
-                    <option value="medium" selected>🟠 ความเสี่ยงปานกลาง (ควรระมัดระวัง)</option>
-                    <option value="low">🟡 ความเสี่ยงน้อย (ยังพอรับมือได้)</option>
+                    <option value="high">🔴 ความเสี่ยงสูง (อันตรายมาก)</option>
+                    <option value="medium" selected>🟠 ความเสี่ยงปานกลาง (ระวังตัว)</option>
+                    <option value="low">🟡 ความเสี่ยงน้อย (พอรับมือได้)</option>
                 </select>
             </div>
-            
-            <div class="form-group">
-                <label for="dangerDetails">รายละเอียดปัญหา</label>
-                <textarea id="dangerDetails" rows="3" placeholder="เช่น ไฟถนนเสีย ชอบมีคนเมาขับรถเร็ว"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="dangerImage">แนบรูปภาพสถานที่ (ถ้ามี)</label>
-                <input type="file" id="dangerImage" accept="image/*">
-            </div>
+            <div class="form-group"><label>รายละเอียดปัญหา</label><textarea id="dangerDetails" rows="3"></textarea></div>
+            <div class="form-group"><label>แนบรูปภาพสถานที่</label><input type="file" id="dangerImage" accept="image/*"></div>
             
             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button onclick="processAndSavePin()" style="flex: 1;">📌 ส่งเรื่องให้แอดมินตรวจสอบ</button>
-                <button class="cancel" onclick="cancelPin()" style="flex: 1;">ล้างข้อมูล</button>
+                <button class="btn-primary" onclick="processAndSavePin()" style="flex: 1;">📌 ส่งเรื่อง</button>
+                <button class="btn-gray" onclick="cancelPin()" style="flex: 1;">ล้างข้อมูล</button>
             </div>
         </div>
     </div>
 
-    <div id="pinDetailsModal" class="pin-modal-overlay">
-        <div class="pin-modal-box">
+    <div id="pinDetailsModal" class="modal-overlay" style="z-index: 2000;">
+        <div class="modal-box">
             <button class="close-btn" onclick="closePinDetails()">✖</button>
             <div id="pd-badge"></div>
             <h2 id="pd-title" style="margin: 10px 0 5px 0; color: #333; font-size: 1.3rem;"></h2>
             <div id="pd-time" style="font-size: 0.85rem; color: #666; margin-bottom: 8px;"></div>
             <p id="pd-detail" style="color: #555; margin-top: 0; line-height: 1.4; font-size: 0.95rem;"></p>
             <img id="pd-img" class="pin-img-preview" src="" style="display: none;">
+            
+            <!-- 🔴 ฟีเจอร์ใหม่: ปุ่มแชร์ลง Social -->
+            <div class="share-group">
+                <button class="share-btn share-line" onclick="shareLine()">📱 แชร์ลง LINE</button>
+                <button class="share-btn share-fb" onclick="shareFacebook()">📘 แชร์ลง Facebook</button>
+            </div>
+            
             <div id="pd-delete-container"></div>
             
             <div class="comment-section">
-                <h4 style="margin: 0 0 8px 0; color: #1976d2; font-size: 0.95rem;">💬 อัปเดตสถานการณ์ / คอมเมนต์</h4>
+                <h4 style="margin: 0 0 8px 0; color: #1976d2;">💬 คอมเมนต์ / อัปเดตสถานการณ์</h4>
                 <div id="pd-comment-list" class="comment-list"></div>
-                <div class="comment-input-group">
-                    <input type="text" id="pd-comment-input" placeholder="พิมพ์คอมเมนต์..." onkeypress="handleCommentEnter(event)">
-                    <button onclick="submitComment()">ส่ง</button>
+                <div class="comment-input-wrapper">
+                    <!-- 🔴 ฟีเจอร์ใหม่: ปุ่มเลือกรูปในคอมเมนต์ -->
+                    <input type="file" id="pd-comment-img" accept="image/*" style="font-size: 0.8rem;">
+                    <div class="comment-input-row">
+                        <input type="text" id="pd-comment-input" placeholder="พิมพ์ข้อความ..." onkeypress="if(event.key==='Enter') submitComment()">
+                        <button onclick="submitComment()">ส่ง</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="customModal" class="modal-overlay">
-        <div class="modal-box">
-            <div id="modalIcon" class="modal-icon"></div>
-            <h2 id="modalTitle" class="modal-title">แจ้งเตือน</h2>
-            <p id="modalText" class="modal-text">ข้อความ...</p>
-            <div id="modalBtnGroup" class="modal-btn-group"></div>
-        </div>
-    </div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <!-- โหลด Leaflet & Heatmap Plugin -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
@@ -213,284 +189,194 @@
             apiKey: "AIzaSyAKl0r6snz3-QsYJz8_Dj5Ejow5Gi7q9lA",
             authDomain: "safe-zone-mapping.firebaseapp.com",
             databaseURL: "https://safe-zone-mapping-default-rtdb.asia-southeast1.firebasedatabase.app", 
-            projectId: "safe-zone-mapping",
-            storageBucket: "safe-zone-mapping.firebasestorage.app",
-            messagingSenderId: "643757597662",
-            appId: "1:643757597662:web:7d7a770dbe82ccce86b34f"
+            projectId: "safe-zone-mapping"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let myDeviceId = localStorage.getItem('safeZoneDeviceId');
-        if (!myDeviceId) {
-            myDeviceId = 'device_' + Math.random().toString(36).substr(2, 9) + Date.now();
-            localStorage.setItem('safeZoneDeviceId', myDeviceId);
-        }
-
+        let myDeviceId = localStorage.getItem('safeZoneDeviceId') || ('device_' + Math.random().toString(36).substr(2, 9));
+        localStorage.setItem('safeZoneDeviceId', myDeviceId);
         db.ref('visitors/' + myDeviceId).set({ lastActive: Date.now() });
-        db.ref('visitors').on('value', (snapshot) => {
-            const data = snapshot.val();
-            document.getElementById('total-visitors').innerText = data ? Object.keys(data).length : 0;
-        });
+        db.ref('visitors').on('value', (s) => document.getElementById('total-visitors').innerText = s.val() ? Object.keys(s.val()).length : 0);
 
         function openFormModal() { document.getElementById('formModal').style.display = 'flex'; }
         function closeFormModal() { document.getElementById('formModal').style.display = 'none'; }
 
-        function showAlert(type, title, text, onConfirm = null) {
-            const modal = document.getElementById('customModal'); const icon = document.getElementById('modalIcon');
-            const modalTitle = document.getElementById('modalTitle'); const modalText = document.getElementById('modalText');
-            const btnGroup = document.getElementById('modalBtnGroup');
-            modalTitle.innerText = title; modalText.innerText = text; btnGroup.innerHTML = '';
-            
-            if (type === 'warning') { icon.innerHTML = '⚠️'; icon.className = 'modal-icon icon-warning'; } 
-            else if (type === 'success') { icon.innerHTML = '✅'; icon.className = 'modal-icon icon-success'; } 
-            else if (type === 'error') { icon.innerHTML = '❌'; icon.className = 'modal-icon icon-error'; } 
-            else if (type === 'question') { icon.innerHTML = '❓'; icon.className = 'modal-icon icon-question'; }
-            
-            if (onConfirm) {
-                const btnConfirm = document.createElement('button'); btnConfirm.className = 'modal-btn btn-red'; btnConfirm.innerText = 'ใช่, ลบเลย';
-                btnConfirm.onclick = function() { closeModal(); onConfirm(); };
-                const btnCancel = document.createElement('button'); btnCancel.className = 'modal-btn btn-gray'; btnCancel.innerText = 'ยกเลิก';
-                btnCancel.onclick = closeModal;
-                btnGroup.appendChild(btnCancel); btnGroup.appendChild(btnConfirm);
-            } else {
-                const btnOk = document.createElement('button'); btnOk.className = 'modal-btn ' + (type === 'error' || type === 'warning' ? 'btn-red' : (type === 'success' ? 'btn-green' : ''));
-                btnOk.innerText = 'ตกลง'; btnOk.onclick = closeModal; btnGroup.appendChild(btnOk);
-            }
-            modal.style.display = 'flex';
-        }
-        function closeModal() { document.getElementById('customModal').style.display = 'none'; }
+        const map = L.map('map', { maxBounds: L.latLngBounds([13.94, 100.58], [14.09, 100.90]), minZoom: 11 }).setView([14.0366, 100.7300], 12);
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }).addTo(map);
 
-        const map = L.map('map', { maxBounds: L.latLngBounds(L.latLng(13.9400, 100.5800), L.latLng(14.0900, 100.9000)), maxBoundsViscosity: 1.0, minZoom: 11 }).setView([14.0366, 100.7300], 12);
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Tiles &copy; Esri' }).addTo(map);
-
-        function makeRiskIcon(color) {
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="46" viewBox="0 0 32 46"><filter id="s" x="-30%" y="-20%" width="160%" height="160%"><feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#000" flood-opacity=".35"/></filter><path filter="url(#s)" d="M16 1C7.7 1 1 7.7 1 16c0 11 15 29 15 29s15-18 15-29C31 7.7 24.3 1 16 1Z" fill="${color}" stroke="white" stroke-width="1.5"/><circle cx="16" cy="16" r="6.2" fill="white" stroke="rgba(0,0,0,.18)" stroke-width="1"/></svg>`;
+        function makeIcon(color) {
             return L.icon({
-                iconUrl: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-                iconSize: [32, 46],
-                iconAnchor: [16, 45],
-                popupAnchor: [0, -42]
+                iconUrl: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="46" viewBox="0 0 32 46"><filter id="s" x="-30%" y="-20%" width="160%" height="160%"><feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#000" flood-opacity=".35"/></filter><path filter="url(#s)" d="M16 1C7.7 1 1 7.7 1 16c0 11 15 29 15 29s15-18 15-29C31 7.7 24.3 1 16 1Z" fill="${color}" stroke="white" stroke-width="1.5"/><circle cx="16" cy="16" r="6.2" fill="white" stroke="rgba(0,0,0,.18)" stroke-width="1"/></svg>`),
+                iconSize: [32, 46], iconAnchor: [16, 45]
             });
         }
-        const icons = {
-            'high': makeRiskIcon('#d32f2f'),   
-            'medium': makeRiskIcon('#f57c00'), 
-            'low': makeRiskIcon('#fbc02d'),
-            'pending': makeRiskIcon('#757575') 
-        };
-        
-        const tempIcon = L.icon({ 
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png', 
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', 
-            iconSize: [25, 41], 
-            iconAnchor: [12, 41] 
-        });
+        const icons = { 'high': makeIcon('#d32f2f'), 'medium': makeIcon('#f57c00'), 'low': makeIcon('#fbc02d'), 'pending': makeIcon('#757575') };
+        const tempIcon = L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png', iconSize: [25, 41], iconAnchor: [12, 41] });
 
         let currentMarkers = []; let globalPinData = {}; 
+        let heatLayer = null; let isHeatmapOn = false; // สำหรับแผนที่ความร้อน
 
         db.ref('safeZonePins').on('value', (snapshot) => {
-            currentMarkers.forEach(marker => map.removeLayer(marker));
+            currentMarkers.forEach(m => map.removeLayer(m));
             currentMarkers = []; globalPinData = snapshot.val() || {};
-            
-            let totalCount = 0; let highCount = 0; let mediumCount = 0; let lowCount = 0;
+            let t=0, h=0, m=0, l=0;
 
             Object.keys(globalPinData).forEach(key => {
                 const pin = globalPinData[key];
-                
-                let markerIcon;
                 if (pin.status === 'pending') {
-                    markerIcon = icons['pending']; 
+                    currentMarkers.push(L.marker([pin.lat, pin.lng], {icon: icons['pending']}).on('click', ()=>openPinDetails(key)).addTo(map));
                 } else if (pin.status === 'approved') {
-                    markerIcon = icons[pin.risk] || icons['medium'];
-                    if (pin.risk === 'high') highCount++;
-                    else if (pin.risk === 'medium') mediumCount++;
-                    else if (pin.risk === 'low') lowCount++;
-                    totalCount++;
-                } else {
-                    return; 
+                    if (pin.risk==='high') h++; else if(pin.risk==='medium') m++; else l++; t++;
+                    currentMarkers.push(L.marker([pin.lat, pin.lng], {icon: icons[pin.risk]}).on('click', ()=>openPinDetails(key)).addTo(map));
                 }
-
-                const newMarker = L.marker([pin.lat, pin.lng], {icon: markerIcon});
-                newMarker.on('click', () => openPinDetails(key));
-                newMarker.addTo(map); 
-                currentMarkers.push(newMarker);
             });
+            document.getElementById('count-total').innerText = t; document.getElementById('count-high').innerText = h;
+            document.getElementById('count-medium').innerText = m; document.getElementById('count-low').innerText = l;
 
-            document.getElementById('count-total').innerText = totalCount;
-            document.getElementById('count-high').innerText = highCount;
-            document.getElementById('count-medium').innerText = mediumCount;
-            document.getElementById('count-low').innerText = lowCount;
+            // รีเฟรชแผนที่ความร้อนถ้าเปิดอยู่
+            if (isHeatmapOn) { toggleHeatmap(true); toggleHeatmap(true); } 
+        });
+
+        // 🔴 ฟังก์ชันแผนที่ความร้อน
+        function toggleHeatmap(forceReload = false) {
+            if (isHeatmapOn && !forceReload) {
+                map.removeLayer(heatLayer); isHeatmapOn = false;
+            } else {
+                if (heatLayer) map.removeLayer(heatLayer);
+                let heatPoints = [];
+                Object.values(globalPinData).forEach(pin => {
+                    if (pin.status === 'approved') {
+                        let intensity = pin.risk === 'high' ? 1.0 : (pin.risk === 'medium' ? 0.6 : 0.3);
+                        heatPoints.push([pin.lat, pin.lng, intensity]);
+                    }
+                });
+                heatLayer = L.heatLayer(heatPoints, {radius: 25, blur: 15, maxZoom: 15}).addTo(map);
+                isHeatmapOn = true;
+            }
+        }
+
+        // 🔴 ฟังก์ชันค้นหา GPS
+        function getLocation() {
+            if (navigator.geolocation) {
+                alert('⏳ ระบบกำลังค้นหาตำแหน่ง GPS ของคุณ...');
+                map.locate({setView: true, maxZoom: 16});
+            } else { alert("เบราว์เซอร์ไม่รองรับ GPS"); }
+        }
+        map.on('locationfound', function(e) {
+            if (tempMarker) map.removeLayer(tempMarker);
+            tempMarker = L.marker(e.latlng, {icon: tempIcon}).addTo(map); currentLatLng = e.latlng;
+            document.getElementById('display-latlng').innerHTML = `📍 พิกัดที่เลือก: <span style="color:#1976d2;">${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}</span>`;
         });
 
         let currentActivePinKey = null; 
         function openPinDetails(pinKey) {
-            const pin = globalPinData[pinKey]; if (!pin) return;
-            currentActivePinKey = pinKey;
-            
-            let badgeHtml = '';
-            if(pin.status === 'pending') {
-                badgeHtml = '<span class="risk-badge risk-pending">⚪ รอแอดมินตรวจสอบ</span>';
-            } else if(pin.risk === 'high') {
-                badgeHtml = '<span class="risk-badge risk-high">🔴 ความเสี่ยงสูง</span>';
-            } else if(pin.risk === 'medium') {
-                badgeHtml = '<span class="risk-badge risk-medium">🟠 ความเสี่ยงปานกลาง</span>';
-            } else {
-                badgeHtml = '<span class="risk-badge risk-low">🟡 ความเสี่ยงน้อย</span>';
-            }
-            
-            document.getElementById('pd-badge').innerHTML = badgeHtml;
+            const pin = globalPinData[pinKey]; currentActivePinKey = pinKey;
+            document.getElementById('pd-badge').innerHTML = pin.status === 'pending' ? '<span class="risk-badge risk-pending">⚪ รอตรวจ</span>' : `<span class="risk-badge risk-${pin.risk}">${pin.risk==='high'?'🔴 สูง':pin.risk==='medium'?'🟠 ปานกลาง':'🟡 น้อย'}</span>`;
             document.getElementById('pd-title').innerText = pin.title; 
-            
-            const timeString = new Date(pin.timestamp).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
-            document.getElementById('pd-time').innerText = `🕒 แจ้งเมื่อ: ${timeString}`;
-            
+            document.getElementById('pd-time').innerText = `🕒 แจ้งเมื่อ: ` + new Date(pin.timestamp).toLocaleString('th-TH');
             document.getElementById('pd-detail').innerText = pin.detail;
-            
-            const imgEl = document.getElementById('pd-img');
-            if (pin.image) { imgEl.src = pin.image; imgEl.style.display = 'block'; } else { imgEl.style.display = 'none'; }
-            
-            const delContainer = document.getElementById('pd-delete-container');
-            if (pin.creatorId === myDeviceId) { delContainer.innerHTML = `<button style="width:100%; background-color:#d32f2f; margin-top:10px;" onclick="confirmDeletePin('${pinKey}')">🗑️ ลบหมุดของฉัน</button>`; } else { delContainer.innerHTML = ''; }
+            document.getElementById('pd-img').src = pin.image || ''; document.getElementById('pd-img').style.display = pin.image ? 'block' : 'none';
+            document.getElementById('pd-delete-container').innerHTML = pin.creatorId === myDeviceId ? `<button style="width:100%; background:#d32f2f; margin-top:10px; padding:8px; border:none; color:white; border-radius:6px; cursor:pointer;" onclick="deleteMyPin('${pinKey}')">🗑️ ลบหมุดนี้</button>` : '';
             
             if (pin.status === 'approved') {
                 db.ref(`safeZonePins/${pinKey}/comments`).on('value', renderComments);
                 document.querySelector('.comment-section').style.display = 'block';
-            } else {
-                document.querySelector('.comment-section').style.display = 'none';
-            }
+            } else document.querySelector('.comment-section').style.display = 'none';
 
             document.getElementById('pinDetailsModal').style.display = 'flex';
         }
+        function closePinDetails() { document.getElementById('pinDetailsModal').style.display = 'none'; if(currentActivePinKey) db.ref(`safeZonePins/${currentActivePinKey}/comments`).off('value', renderComments); }
 
-        function closePinDetails() {
-            document.getElementById('pinDetailsModal').style.display = 'none';
-            if (currentActivePinKey) { db.ref(`safeZonePins/${currentActivePinKey}/comments`).off('value', renderComments); currentActivePinKey = null; }
-        }
-
-        function renderComments(snapshot) {
+        function renderComments(s) {
             const listEl = document.getElementById('pd-comment-list'); listEl.innerHTML = ''; 
-            const comments = snapshot.val();
-            if (comments) {
-                Object.values(comments).forEach(c => {
-                    const timeString = new Date(c.timestamp).toLocaleString('th-TH', { hour: '2-digit', minute:'2-digit', day:'numeric', month:'short' });
-                    const div = document.createElement('div'); div.className = 'comment-item';
-                    div.innerHTML = `<span class="comment-time">🕒 ${timeString}</span>${c.text}`;
-                    listEl.appendChild(div);
-                });
-                listEl.scrollTop = listEl.scrollHeight;
-            } else { listEl.innerHTML = '<div style="text-align:center; color:#999; font-size:0.85rem; margin-top:10px;">ยังไม่มีคอมเมนต์ เป็นคนแรกที่อัปเดตสิ!</div>'; }
+            if (s.val()) {
+                Object.values(s.val()).forEach(c => {
+                    let d = document.createElement('div'); d.className = 'comment-item';
+                    // 🔴 โชว์รูปในคอมเมนต์ถ้ามี 🔴
+                    let imgHtml = c.image ? `<br><img src="${c.image}" style="max-width:150px; border-radius:4px; margin-top:5px; border:1px solid #ddd;">` : '';
+                    d.innerHTML = `<span class="comment-time">🕒 ${new Date(c.timestamp).toLocaleString('th-TH')}</span><b>${c.text}</b> ${imgHtml}`;
+                    listEl.appendChild(d);
+                }); listEl.scrollTop = listEl.scrollHeight;
+            } else listEl.innerHTML = '<div style="text-align:center; color:#999; font-size:0.85rem;">ยังไม่มีคอมเมนต์ ถ่ายรูปอัปเดตสิ!</div>';
         }
 
-        function handleCommentEnter(e) { if (e.key === 'Enter') submitComment(); }
+        // 🔴 ฟังก์ชันคอมเมนต์พร้อมรูปภาพ
         function submitComment() {
-            const inputEl = document.getElementById('pd-comment-input'); const text = inputEl.value.trim();
-            if (!text || !currentActivePinKey) return;
-            db.ref(`safeZonePins/${currentActivePinKey}/comments`).push({ text: text, timestamp: Date.now() });
-            inputEl.value = ''; 
+            const text = document.getElementById('pd-comment-input').value.trim();
+            const file = document.getElementById('pd-comment-img').files[0];
+            if (!text && !file) return;
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const img = new Image(); img.onload = () => {
+                        const canvas = document.createElement('canvas'); const scale = 300 / img.width;
+                        canvas.width = 300; canvas.height = img.height * scale;
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                        saveCommentToDB(text, canvas.toDataURL('image/jpeg', 0.6));
+                    }; img.src = e.target.result;
+                }; reader.readAsDataURL(file);
+            } else saveCommentToDB(text, null);
+        }
+        function saveCommentToDB(text, imgUrl) {
+            db.ref(`safeZonePins/${currentActivePinKey}/comments`).push({ text: text, image: imgUrl, timestamp: Date.now() });
+            document.getElementById('pd-comment-input').value = ''; document.getElementById('pd-comment-img').value = '';
         }
 
-        window.confirmDeletePin = function(pinKey) {
-            showAlert('question', 'ยืนยันการลบหมุด', 'คุณต้องการลบหมุดจุดเสี่ยงนี้ใช่หรือไม่?', function() {
-                db.ref('safeZonePins/' + pinKey).remove().then(() => { closePinDetails(); showAlert('success', 'ลบสำเร็จ', 'หมุดของคุณถูกลบออกจากระบบแล้ว'); });
-            });
-        };
+        function deleteMyPin(k) { if(confirm('ลบหมุดนี้?')) { db.ref('safeZonePins/'+k).remove(); closePinDetails(); } }
 
-        let searchTimeout = null; const viewBoxStr = "100.5800,14.0900,100.9000,13.9400"; 
-        function handleInput(e) {
-            clearTimeout(searchTimeout); const q = e.target.value; const res = document.getElementById('searchResults');
-            if(q.length < 3) { res.innerHTML = ''; return; }
-            searchTimeout = setTimeout(async () => {
-                const data = await (await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=th&viewbox=${viewBoxStr}&bounded=1&limit=5`)).json();
-                res.innerHTML = '';
-                if(data.length > 0) data.forEach(i => {
-                    const d = document.createElement('div'); d.innerHTML = `<strong>${i.name}</strong> <span style="font-size:0.85em;color:#666;">${i.display_name}</span>`;
-                    d.onclick = () => { document.getElementById('searchInput').value = i.name; res.innerHTML=''; map.flyTo([i.lat, i.lon], 16, {animate:true, duration:1.5}); };
-                    res.appendChild(d);
-                }); else res.innerHTML = '<div style="color:#999; text-align:center;">ไม่พบข้อมูลสถานที่ (ในเขตธัญบุรี)</div>';
-            }, 500);
-        }
-        document.addEventListener("click", e => { if (e.target.id !== "searchInput") document.getElementById('searchResults').innerHTML = ''; });
-        function handleEnter(e) { if (e.key === 'Enter') searchLocation(); }
+        // 🔴 ฟังก์ชันแชร์ Social
+        function shareLine() { window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(window.location.href)}&text=ระวังจุดเสี่ยง: ${document.getElementById('pd-title').innerText}`, '_blank'); }
+        function shareFacebook() { window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank'); }
+
+        let searchTimeout = null; 
+        function handleInput(e) { clearTimeout(searchTimeout); searchTimeout = setTimeout(searchLocation, 600); }
+        function handleEnter(e) { if(e.key==='Enter') searchLocation(); }
         async function searchLocation() {
-            const q = document.getElementById('searchInput').value; if(!q) return showAlert('warning', 'แจ้งเตือน', 'กรุณาพิมพ์ชื่อสถานที่');
-            const btn = document.querySelector('.btn-search'); btn.innerText = "กำลังหา...";
-            try {
-                const data = await (await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=th&viewbox=${viewBoxStr}&bounded=1&limit=1`)).json();
-                if(data.length > 0) map.flyTo([data[0].lat, data[0].lon], 16, {animate:true, duration:1.5});
-                else showAlert('info', 'ไม่พบสถานที่', 'ไม่พบสถานที่นี้ในเขตอำเภอธัญบุรีครับ');
-            } catch(e){} btn.innerText = "ค้นหา"; 
+            const q = document.getElementById('searchInput').value; if(!q || q.length<3) return;
+            const data = await (await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=th&viewbox=100.58,14.09,100.90,13.94&bounded=1&limit=5`)).json();
+            const res = document.getElementById('searchResults'); res.innerHTML = '';
+            data.forEach(i => {
+                const d = document.createElement('div'); d.innerHTML = `<b>${i.name}</b> <span style="font-size:0.8em;color:#666">${i.display_name}</span>`;
+                d.onclick = () => { map.flyTo([i.lat, i.lon], 16); res.innerHTML=''; document.getElementById('searchInput').value=i.name; };
+                res.appendChild(d);
+            });
         }
 
         let tempMarker = null; let currentLatLng = null;
-        map.on('click', function(e) {
-            currentLatLng = e.latlng;
-            if (tempMarker) map.removeLayer(tempMarker);
+        map.on('click', e => {
+            currentLatLng = e.latlng; if(tempMarker) map.removeLayer(tempMarker);
             tempMarker = L.marker(currentLatLng, {icon: tempIcon}).addTo(map); 
-            document.getElementById('display-latlng').innerHTML = `📍 พิกัดที่เลือก: <span style="color: #1976d2;">${currentLatLng.lat.toFixed(4)}, ${currentLatLng.lng.toFixed(4)}</span>`;
+            document.getElementById('display-latlng').innerHTML = `📍 พิกัดที่เลือก: <span style="color:#1976d2;">${currentLatLng.lat.toFixed(4)}, ${currentLatLng.lng.toFixed(4)}</span>`;
         });
-
-        function cancelPin() {
-            if (tempMarker) map.removeLayer(tempMarker); currentLatLng = null;
-            document.getElementById('display-latlng').innerHTML = `📍 สถานะพิกัด: ยังไม่ได้เลือก (กรุณาคลิกบนแผนที่ก่อน)`;
-            document.getElementById('locationName').value = ''; document.getElementById('dangerDetails').value = '';
-            document.getElementById('dangerImage').value = ''; document.getElementById('riskLevel').value = 'medium';
-        }
+        function cancelPin() { if(tempMarker) map.removeLayer(tempMarker); currentLatLng = null; document.getElementById('display-latlng').innerText="📍 สถานะพิกัด: ยังไม่ได้เลือกพิกัด"; document.getElementById('locationName').value=''; document.getElementById('dangerDetails').value=''; document.getElementById('dangerImage').value=''; }
 
         function processAndSavePin() {
-            if (!currentLatLng) return showAlert('warning', 'ยังไม่ได้เลือกพิกัด!', 'กรุณาคลิกบนแผนที่เพื่อเลือกตำแหน่งก่อนครับ');
-            const title = document.getElementById('locationName').value; const risk = document.getElementById('riskLevel').value;
-            const detail = document.getElementById('dangerDetails').value; const imageFile = document.getElementById('dangerImage').files[0];
+            if(!currentLatLng) return alert('คลิกบนแผนที่เพื่อระบุตำแหน่งก่อนครับ');
+            const title = document.getElementById('locationName').value; const detail = document.getElementById('dangerDetails').value;
+            if(!title || !detail) return alert('กรอกชื่อและรายละเอียดให้ครบครับ');
+            const file = document.getElementById('dangerImage').files[0];
 
-            if(!title || !detail) return showAlert('warning', 'ข้อมูลไม่ครบ', 'กรุณากรอกชื่อสถานที่และรายละเอียดครับ');
-            const btnSave = document.querySelector('button[onclick="processAndSavePin()"]'); btnSave.innerText = "กำลังส่งเรื่อง..."; btnSave.disabled = true;
-
-            if (imageFile) {
-                const reader = new FileReader(); reader.onload = e => {
+            if(file) {
+                const r = new FileReader(); r.onload = e => {
                     const img = new Image(); img.onload = () => {
-                        const canvas = document.createElement('canvas'); const scaleSize = 400 / img.width;
-                        canvas.width = 400; canvas.height = img.height * scaleSize;
-                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                        saveDataToFirebase(title, detail, risk, canvas.toDataURL('image/jpeg', 0.6), btnSave);
+                        const cvs = document.createElement('canvas'); cvs.width=400; cvs.height=img.height*(400/img.width);
+                        cvs.getContext('2d').drawImage(img,0,0,cvs.width,cvs.height);
+                        sendToDB(title, detail, document.getElementById('riskLevel').value, cvs.toDataURL('image/jpeg',0.6));
                     }; img.src = e.target.result;
-                }; reader.readAsDataURL(imageFile);
-            } else saveDataToFirebase(title, detail, risk, null, btnSave);
+                }; r.readAsDataURL(file);
+            } else sendToDB(title, detail, document.getElementById('riskLevel').value, null);
         }
 
-        function saveDataToFirebase(title, detail, risk, imageUrl, btnSave) {
-            db.ref('safeZonePins').push({ 
-                lat: currentLatLng.lat, lng: currentLatLng.lng, title: title, detail: detail, 
-                risk: risk, image: imageUrl || null, timestamp: Date.now(), 
-                creatorId: myDeviceId, status: 'pending' 
-            })
-            .then(() => { 
-                // 🔴 เชื่อมต่อ Discord Webhook ที่เตอร์ให้มา 🔴
-                const webhookURL = "https://discord.com/api/webhooks/1558465611447673033/4DlEWJrja1iCsBThuOyqCYcgxfRQM4xXJVlu9VToC36EPM5ZCYirC6yalRqVdNACNX9r";
-                
-                let riskEmoji = "🟠 ปานกลาง";
-                if(risk === 'high') riskEmoji = "🔴 ความเสี่ยงสูง";
-                if(risk === 'low') riskEmoji = "🟡 ความเสี่ยงน้อย";
-
-                const discordMessage = {
-                    content: `🚨 **มีผู้แจ้งจุดเสี่ยงใหม่เข้ามา!** (รอแอดมินตรวจสอบ)\n📌 **สถานที่:** ${title}\n⚠️ **ระดับความเสี่ยง:** ${riskEmoji}\n📝 **รายละเอียด:** ${detail}`
-                };
-
-                fetch(webhookURL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(discordMessage)
-                }).catch(err => console.log("Discord notify error:", err));
-
-                closeFormModal(); 
-                showAlert('success', 'ส่งเรื่องสำเร็จ!', 'หมุดของคุณขึ้นบนแผนที่แล้วในสถานะ "รอตรวจสอบ" (สีเทา) จะเปลี่ยนเป็นสีตามระดับความเสี่ยงเมื่อแอดมินอนุมัติครับ'); 
-                cancelPin(); 
-                btnSave.innerText = "📌 ส่งเรื่องให้แอดมินตรวจสอบ"; 
-                btnSave.disabled = false; 
-            })
-            .catch(() => { 
-                showAlert('error', 'ข้อผิดพลาด!', 'เชื่อมต่อฐานข้อมูลล้มเหลว'); 
-                btnSave.innerText = "📌 ส่งเรื่องให้แอดมินตรวจสอบ"; 
-                btnSave.disabled = false; 
+        function sendToDB(title, detail, risk, imgUrl) {
+            db.ref('safeZonePins').push({ lat:currentLatLng.lat, lng:currentLatLng.lng, title:title, detail:detail, risk:risk, image:imgUrl, timestamp:Date.now(), creatorId:myDeviceId, status:'pending' })
+            .then(() => {
+                fetch("https://discord.com/api/webhooks/1558465611447673033/4DlEWJrja1iCsBThuOyqCYcgxfRQM4xXJVlu9VToC36EPM5ZCYirC6yalRqVdNACNX9r", {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ content: `🚨 **แจ้งจุดเสี่ยงใหม่!**\n📌 สถานที่: ${title}\n⚠️ ความเสี่ยง: ${risk==='high'?'🔴สูง':risk==='medium'?'🟠ปานกลาง':'🟡น้อย'}\n📝 ปัญหา: ${detail}` })
+                });
+                alert('ส่งข้อมูลสำเร็จ! รอแอดมินตรวจสอบครับ'); closeFormModal(); cancelPin();
             });
         }
     </script>

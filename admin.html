@@ -10,7 +10,10 @@
         body { font-family: 'Sarabun', sans-serif; margin: 0; padding: 0; background-color: #f4f4f9; color: #333; }
         header { background-color: #333; color: white; padding: 1.2rem 2rem; display: flex; justify-content: space-between; align-items: center; }
         h1 { margin: 0; font-size: 1.4rem; }
-        .back-link { color: #fff; text-decoration: none; background: #d32f2f; padding: 8px 15px; border-radius: 6px; font-size: 0.9rem; }
+        .header-btns { display: flex; gap: 10px; }
+        .btn-top { color: white; text-decoration: none; padding: 8px 15px; border-radius: 6px; font-size: 0.9rem; border: none; cursor: pointer; font-family: inherit; font-weight: bold; }
+        .btn-back { background: #757575; }
+        .btn-export { background: #1976d2; } /* 🔴 ปุ่ม Export CSV */
         
         main { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
         .section-title { margin-top: 30px; margin-bottom: 15px; font-size: 1.3rem; color: #333; border-bottom: 2px solid #ddd; padding-bottom: 5px; }
@@ -31,239 +34,161 @@
         .btn-edit { background-color: #ff9800; color: white; }
         .btn-delete { background-color: #757575; color: white; }
         
-        /* Modal สำหรับแก้ไขโพสต์ */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 3000; align-items: center; justify-content: center; padding: 15px; }
-        .modal-box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.9rem; }
-        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; box-sizing: border-box; }
-        
         .comment-box-admin { background: #f9f9f9; padding: 8px; border-radius: 6px; margin-top: 8px; font-size: 0.85rem; border: 1px solid #eee; }
         .comment-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; border-bottom: 1px dashed #ddd; padding-bottom: 3px; }
-        
         .empty-state { text-align: center; padding: 30px; color: #888; font-size: 1rem; background: white; border-radius: 8px; margin-bottom: 20px; }
+        
+        /* 🔴 Modal รหัสผ่าน และ Modal แก้ไข */
+        .modal-overlay { display: flex; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 3000; align-items: center; justify-content: center; padding: 15px; }
+        .modal-box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; }
+        .form-group { margin-bottom: 12px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.9rem; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>🛠️ ระบบจัดการหลังบ้านแอดมิน (Admin Dashboard)</h1>
-        <a href="index.html" class="back-link">⬅️ กลับหน้าแผนที่หลัก</a>
-    </header>
-
-    <main>
-        <h2 class="section-title">📋 รายการจุดเสี่ยงที่รอการตรวจสอบ (Pending)</h2>
-        <div id="pending-list">
-            <div class="empty-state">กำลังโหลดข้อมูล...</div>
+    <!-- 🔴 ระบบ Login แอดมิน (บังทั้งหน้าจอจนกว่าจะใส่รหัสถูก) -->
+    <div id="loginOverlay" class="modal-overlay">
+        <div class="modal-box">
+            <h2 style="color:#d32f2f; margin-top:0;">🔒 ยืนยันตัวตนแอดมิน</h2>
+            <p style="font-size:0.9rem; color:#666;">กรุณาใส่รหัสผ่านเพื่อเข้าจัดการระบบ</p>
+            <input type="password" id="adminPwd" placeholder="รหัสผ่าน..." style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ccc; border-radius:6px; font-family:inherit; text-align:center;">
+            <button onclick="checkAdminLogin()" style="width:100%; background:#d32f2f; color:white; padding:10px;">เข้าสู่ระบบ</button>
         </div>
+    </div>
 
-        <h2 class="section-title">📍 จุดเสี่ยงทั้งหมดที่อนุมัติแล้วบนแผนที่ (Managed Approved Pins)</h2>
-        <div id="approved-list">
-            <div class="empty-state">กำลังโหลดข้อมูล...</div>
-        </div>
-    </main>
-
-    <!-- Modal สำหรับแก้ไขโพสต์ -->
-    <div id="editModal" class="modal-overlay">
+    <!-- Modal แก้ไขข้อมูล -->
+    <div id="editModal" class="modal-overlay" style="display:none; background:rgba(0,0,0,0.6);">
         <div class="modal-box">
             <h3 style="margin-top:0; color:#d32f2f;">✏️ แก้ไขข้อมูลจุดเสี่ยง</h3>
             <input type="hidden" id="edit-key">
-            <div class="form-group">
-                <label>ชื่อสถานที่</label>
-                <input type="text" id="edit-title">
-            </div>
+            <div class="form-group"><label>ชื่อสถานที่</label><input type="text" id="edit-title"></div>
             <div class="form-group">
                 <label>ระดับความเสี่ยง</label>
-                <select id="edit-risk">
-                    <option value="high">🔴 ความเสี่ยงสูง</option>
-                    <option value="medium">🟠 ความเสี่ยงปานกลาง</option>
-                    <option value="low">🟡 ความเสี่ยงน้อย</option>
-                </select>
+                <select id="edit-risk"><option value="high">🔴 สูง</option><option value="medium">🟠 ปานกลาง</option><option value="low">🟡 น้อย</option></select>
             </div>
-            <div class="form-group">
-                <label>รายละเอียดปัญหา</label>
-                <textarea id="edit-detail" rows="3"></textarea>
-            </div>
+            <div class="form-group"><label>รายละเอียดปัญหา</label><textarea id="edit-detail" rows="3"></textarea></div>
             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button class="btn-approve" onclick="saveEditPin()" style="flex:1;">💾 บันทึกการแก้ไข</button>
-                <button class="btn-delete" onclick="closeEditModal()" style="flex:1;">ยกเลิก</button>
+                <button class="btn-approve" onclick="saveEditPin()" style="flex:1;">💾 บันทึก</button>
+                <button class="btn-delete" onclick="document.getElementById('editModal').style.display='none'" style="flex:1;">ยกเลิก</button>
             </div>
         </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <header>
+        <h1>🛠️ ระบบจัดการหลังบ้านแอดมิน</h1>
+        <div class="header-btns">
+            <!-- 🔴 ปุ่มดาวน์โหลด Excel (CSV) -->
+            <button class="btn-top btn-export" onclick="exportToCSV()">📥 โหลดรายงาน (Excel)</button>
+            <a href="index.html" class="btn-top btn-back">⬅️ กลับหน้าแผนที่</a>
+        </div>
+    </header>
+
+    <main>
+        <h2 class="section-title">📋 รอการตรวจสอบ (Pending)</h2>
+        <div id="pending-list"><div class="empty-state">กำลังโหลด...</div></div>
+        <h2 class="section-title">📍 อนุมัติแล้ว (Approved Pins)</h2>
+        <div id="approved-list"><div class="empty-state">กำลังโหลด...</div></div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyAKl0r6snz3-QsYJz8_Dj5Ejow5Gi7q9lA",
-            authDomain: "safe-zone-mapping.firebaseapp.com",
-            databaseURL: "https://safe-zone-mapping-default-rtdb.asia-southeast1.firebasedatabase.app", 
-            projectId: "safe-zone-mapping",
-            storageBucket: "safe-zone-mapping.firebasestorage.app",
-            messagingSenderId: "643757597662",
-            appId: "1:643757597662:web:7d7a770dbe82ccce86b34f"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        // 🔴 เช็ครหัสผ่าน Admin (กำหนดเป็น admin1234)
+        function checkAdminLogin() {
+            if(document.getElementById('adminPwd').value === "admin1234") {
+                document.getElementById('loginOverlay').style.display = 'none';
+            } else { alert("❌ รหัสผ่านไม่ถูกต้อง!"); }
+        }
 
-        function makeRiskIcon(color) {
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="46" viewBox="0 0 32 46"><filter id="s" x="-30%" y="-20%" width="160%" height="160%"><feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#000" flood-opacity=".35"/></filter><path filter="url(#s)" d="M16 1C7.7 1 1 7.7 1 16c0 11 15 29 15 29s15-18 15-29C31 7.7 24.3 1 16 1Z" fill="${color}" stroke="white" stroke-width="1.5"/><circle cx="16" cy="16" r="6.2" fill="white" stroke="rgba(0,0,0,.18)" stroke-width="1"/></svg>`;
+        const firebaseConfig = {
+            apiKey: "AIzaSyAKl0r6snz3-QsYJz8_Dj5Ejow5Gi7q9lA", authDomain: "safe-zone-mapping.firebaseapp.com",
+            databaseURL: "https://safe-zone-mapping-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "safe-zone-mapping"
+        };
+        firebase.initializeApp(firebaseConfig); const db = firebase.database();
+
+        let adminGlobalData = null; // เก็บข้อมูลไว้ทำ Export CSV
+
+        function makeIcon(color) {
             return L.icon({
-                iconUrl: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
-                iconSize: [32, 46],
-                iconAnchor: [16, 45],
-                popupAnchor: [0, -42]
+                iconUrl: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="46" viewBox="0 0 32 46"><filter id="s" x="-30%" y="-20%" width="160%" height="160%"><feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#000" flood-opacity=".35"/></filter><path filter="url(#s)" d="M16 1C7.7 1 1 7.7 1 16c0 11 15 29 15 29s15-18 15-29C31 7.7 24.3 1 16 1Z" fill="${color}" stroke="white" stroke-width="1.5"/><circle cx="16" cy="16" r="6.2" fill="white" stroke="rgba(0,0,0,.18)" stroke-width="1"/></svg>`),
+                iconSize: [32, 46], iconAnchor: [16, 45]
             });
         }
-        const icons = {
-            'high': makeRiskIcon('#d32f2f'),   
-            'medium': makeRiskIcon('#f57c00'), 
-            'low': makeRiskIcon('#fbc02d'),
-            'pending': makeRiskIcon('#757575') 
-        };
+        const icons = { 'high': makeIcon('#d32f2f'), 'medium': makeIcon('#f57c00'), 'low': makeIcon('#fbc02d'), 'pending': makeIcon('#757575') };
 
         db.ref('safeZonePins').on('value', (snapshot) => {
-            const pendingListEl = document.getElementById('pending-list');
-            const approvedListEl = document.getElementById('approved-list');
-            pendingListEl.innerHTML = '';
-            approvedListEl.innerHTML = '';
-            
-            const data = snapshot.val();
-            let hasPending = false;
-            let hasApproved = false;
+            document.getElementById('pending-list').innerHTML = ''; document.getElementById('approved-list').innerHTML = '';
+            adminGlobalData = snapshot.val() || {};
+            let hasP=false, hasA=false;
 
-            if (data) {
-                Object.keys(data).forEach(key => {
-                    const pin = data[key];
-                    const timeString = new Date(pin.timestamp).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
-                    
-                    let riskText = 'ความเสี่ยงปานกลาง';
-                    let riskColor = '#f57c00';
-                    if(pin.risk === 'high') { riskText = 'ความเสี่ยงสูง'; riskColor = '#d32f2f'; }
-                    else if(pin.risk === 'low') { riskText = 'ความเสี่ยงน้อย'; riskColor = '#fbc02d'; }
+            Object.keys(adminGlobalData).forEach(key => {
+                const pin = adminGlobalData[key];
+                const time = new Date(pin.timestamp).toLocaleString('th-TH');
+                let riskTxt = pin.risk==='high'?'สูง':pin.risk==='low'?'น้อย':'ปานกลาง';
+                let imgHtml = pin.image ? `<img src="${pin.image}" class="pending-img">` : '';
 
-                    let imgHtml = pin.image ? `<img src="${pin.image}" class="pending-img">` : '';
+                // 🔴 แสดงรูปภาพในคอมเมนต์ด้วย 🔴
+                let cmtHtml = '';
+                if(pin.comments) {
+                    cmtHtml += `<div class="comment-box-admin"><strong>💬 คอมเมนต์:</strong>`;
+                    Object.keys(pin.comments).forEach(cKey => {
+                        let c = pin.comments[cKey];
+                        let cImg = c.image ? `<br><img src="${c.image}" style="max-height:40px; border:1px solid #ccc;">` : '';
+                        cmtHtml += `<div class="comment-row"><span>- ${c.text} ${cImg}</span> <button onclick="deleteComment('${key}','${cKey}')" style="background:#d32f2f; color:white; padding:2px 5px; font-size:0.7rem;">ลบ</button></div>`;
+                    }); cmtHtml += `</div>`;
+                }
 
-                    let commentsHtml = '';
-                    if (pin.comments) {
-                        commentsHtml += `<div class="comment-box-admin"><strong>💬 คอมเมนต์ในโพสต์นี้:</strong>`;
-                        Object.keys(pin.comments).forEach(cKey => {
-                            const c = pin.comments[cKey];
-                            commentsHtml += `
-                                <div class="comment-row">
-                                    <span>- ${c.text}</span>
-                                    <button onclick="deleteComment('${key}', '${cKey}')" style="background:#d32f2f; color:white; padding:2px 6px; font-size:0.75rem;">ลบคอมเมนต์</button>
-                                </div>`;
-                        });
-                        commentsHtml += `</div>`;
-                    }
+                let card = `<div class="pending-card">
+                    <div id="m-${key}" class="mini-map"></div>
+                    <div class="pending-info">
+                        <div class="pending-title">${pin.title} <span style="font-size:0.8rem; color:${pin.risk==='high'?'#d32f2f':'#f57c00'}">(${riskTxt})</span></div>
+                        <div class="pending-detail">${pin.detail}</div>${imgHtml}<div class="pending-meta">🕒 ${time}</div>${cmtHtml}
+                        <div class="btn-group" style="margin-top:10px;">
+                            ${pin.status==='pending' ? `<button class="btn-approve" onclick="updateSt('${key}','approved')">✅ อนุมัติ</button>` : `<button class="btn-edit" onclick="openEdit('${key}','${pin.title}','${pin.risk}','${pin.detail}')">✏️ แก้ไข</button>`}
+                            <button class="btn-delete" onclick="delPin('${key}')">🗑️ ลบทิ้ง</button>
+                        </div>
+                    </div></div>`;
+                
+                if(pin.status === 'pending') { document.getElementById('pending-list').insertAdjacentHTML('beforeend', card); hasP=true; }
+                else { document.getElementById('approved-list').insertAdjacentHTML('beforeend', card); hasA=true; }
 
-                    if (pin.status === 'pending') {
-                        hasPending = true;
-                        const card = document.createElement('div');
-                        card.className = 'pending-card';
-                        card.innerHTML = `
-                            <div id="mini-map-p-${key}" class="mini-map"></div>
-                            <div class="pending-info">
-                                <div class="pending-title">${pin.title} <span style="font-size:0.85rem; color:${riskColor};">(${riskText})</span></div>
-                                <div class="pending-detail"><strong>รายละเอียด:</strong> ${pin.detail}</div>
-                                ${imgHtml}
-                                <div class="pending-meta">🕒 แจ้งเมื่อ: ${timeString}</div>
-                                <div class="btn-group">
-                                    <button class="btn-approve" onclick="updatePinStatus('${key}', 'approved')">✅ อนุมัติ</button>
-                                    <button class="btn-reject" onclick="deletePin('${key}')">❌ ปฏิเสธ/ลบทิ้ง</button>
-                                </div>
-                            </div>
-                        `;
-                        pendingListEl.appendChild(card);
-                        setTimeout(() => {
-                            const m = L.map(`mini-map-p-${key}`, {zoomControl:false, dragging:false, scrollWheelZoom:false}).setView([pin.lat, pin.lng], 15);
-                            // 🔴 ใช้แผนที่ Esri โทนสีเหลืองแบบเดียวกับหน้า User 🔴
-                            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }).addTo(m);
-                            L.marker([pin.lat, pin.lng], {icon: icons['pending']}).addTo(m);
-                        }, 100);
-                    } 
-                    
-                    else if (pin.status === 'approved') {
-                        hasApproved = true;
-                        const pinIcon = icons[pin.risk] || icons['medium'];
-                        const card = document.createElement('div');
-                        card.className = 'pending-card';
-                        card.innerHTML = `
-                            <div id="mini-map-a-${key}" class="mini-map"></div>
-                            <div class="pending-info">
-                                <div class="pending-title">${pin.title} <span style="font-size:0.85rem; color:${riskColor};">(${riskText})</span></div>
-                                <div class="pending-detail"><strong>รายละเอียด:</strong> ${pin.detail}</div>
-                                ${imgHtml}
-                                <div class="pending-meta">🕒 แจ้งเมื่อ: ${timeString}</div>
-                                ${commentsHtml}
-                                <div class="btn-group" style="margin-top:10px;">
-                                    <button class="btn-edit" onclick="openEditModal('${key}', '${pin.title}', '${pin.risk}', '${pin.detail.replace(/'/g, "\\'")}')">✏️ แก้ไขโพสต์</button>
-                                    <button class="btn-delete" onclick="deletePin('${key}')">🗑️ ลบหมุดนี้ทิ้ง</button>
-                                </div>
-                            </div>
-                        `;
-                        approvedListEl.appendChild(card);
-                        setTimeout(() => {
-                            const m = L.map(`mini-map-a-${key}`, {zoomControl:false, dragging:false, scrollWheelZoom:false}).setView([pin.lat, pin.lng], 15);
-                            // 🔴 ใช้แผนที่ Esri โทนสีเหลืองแบบเดียวกับหน้า User 🔴
-                            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }).addTo(m);
-                            L.marker([pin.lat, pin.lng], {icon: pinIcon}).addTo(m);
-                        }, 100);
-                    }
-                });
-            }
-
-            if (!hasPending) pendingListEl.innerHTML = '<div class="empty-state">🎉 ไม่มีรายการรอตรวจสอบในขณะนี้!</div>';
-            if (!hasApproved) approvedListEl.innerHTML = '<div class="empty-state">📌 ยังไม่มีจุดเสี่ยงที่อนุมัติบนแผนที่</div>';
+                setTimeout(() => {
+                    let map = L.map(`m-${key}`, {zoomControl:false, dragging:false, scrollWheelZoom:false}).setView([pin.lat, pin.lng], 15);
+                    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}').addTo(map);
+                    L.marker([pin.lat, pin.lng], {icon: icons[pin.status==='pending'?'pending':pin.risk]}).addTo(map);
+                }, 100);
+            });
+            if(!hasP) document.getElementById('pending-list').innerHTML = '<div class="empty-state">ไม่มีรายการรอตรวจ</div>';
+            if(!hasA) document.getElementById('approved-list').innerHTML = '<div class="empty-state">ยังไม่มีข้อมูล</div>';
         });
 
-        function updatePinStatus(pinKey, newStatus) {
-            db.ref(`safeZonePins/${pinKey}`).update({ status: newStatus })
-                .then(() => alert('อัปเดตสถานะหมุดสำเร็จ!'));
-        }
+        function updateSt(k, st) { db.ref(`safeZonePins/${k}`).update({status:st}); }
+        function delPin(k) { if(confirm('ลบหมุดนี้?')) db.ref(`safeZonePins/${k}`).remove(); }
+        function deleteComment(p, c) { if(confirm('ลบคอมเมนต์?')) db.ref(`safeZonePins/${p}/comments/${c}`).remove(); }
+        
+        function openEdit(k, t, r, d) { document.getElementById('edit-key').value=k; document.getElementById('edit-title').value=t; document.getElementById('edit-risk').value=r; document.getElementById('edit-detail').value=d; document.getElementById('editModal').style.display='flex'; }
+        function saveEditPin() { db.ref('safeZonePins/'+document.getElementById('edit-key').value).update({title: document.getElementById('edit-title').value, risk: document.getElementById('edit-risk').value, detail: document.getElementById('edit-detail').value}); document.getElementById('editModal').style.display='none'; }
 
-        function deletePin(pinKey) {
-            if (confirm('คุณต้องการลบหมุดนี้ออกจากระบบใช่หรือไม่?')) {
-                db.ref(`safeZonePins/${pinKey}`).remove()
-                    .then(() => alert('ลบหมุดเรียบร้อยแล้ว'));
-            }
-        }
+        // 🔴 ฟังก์ชัน Export ข้อมูลเป็นไฟล์ Excel/CSV 🔴
+        function exportToCSV() {
+            if (!adminGlobalData) return alert('ไม่มีข้อมูล');
+            let csv = "data:text/csv;charset=utf-8,\uFEFF"; // รองรับภาษาไทย
+            csv += "ชื่อสถานที่,ระดับความเสี่ยง,รายละเอียดปัญหา,สถานะ,พิกัดละติจูด,พิกัดลองจิจูด,วันที่แจ้ง\n";
 
-        function deleteComment(pinKey, commentKey) {
-            if (confirm('คุณต้องการลบคอมเมนต์นี้ใช่หรือไม่?')) {
-                db.ref(`safeZonePins/${pinKey}/comments/${commentKey}`).remove()
-                    .then(() => alert('ลบคอมเมนต์เรียบร้อยแล้ว'));
-            }
-        }
-
-        function openEditModal(key, title, risk, detail) {
-            document.getElementById('edit-key').value = key;
-            document.getElementById('edit-title').value = title;
-            document.getElementById('edit-risk').value = risk;
-            document.getElementById('edit-detail').value = detail;
-            document.getElementById('editModal').style.display = 'flex';
-        }
-
-        function closeEditModal() {
-            document.getElementById('editModal').style.display = 'none';
-        }
-
-        function saveEditPin() {
-            const key = document.getElementById('edit-key').value;
-            const title = document.getElementById('edit-title').value;
-            const risk = document.getElementById('edit-risk').value;
-            const detail = document.getElementById('edit-detail').value;
-
-            if (!title || !detail) return alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-
-            db.ref(`safeZonePins/${key}`).update({ title: title, risk: risk, detail: detail })
-                .then(() => {
-                    closeEditModal();
-                    alert('แก้ไขข้อมูลโพสต์เรียบร้อยแล้ว!');
-                });
+            Object.values(adminGlobalData).forEach(pin => {
+                let title = `"${(pin.title||'').replace(/"/g, '""')}"`;
+                let detail = `"${(pin.detail||'').replace(/"/g, '""')}"`;
+                let risk = pin.risk === 'high' ? 'สูง' : (pin.risk === 'medium' ? 'ปานกลาง' : 'น้อย');
+                let status = pin.status === 'approved' ? 'อนุมัติแล้ว' : 'รอตรวจสอบ';
+                let time = new Date(pin.timestamp).toLocaleString('th-TH');
+                csv += `${title},${risk},${detail},${status},${pin.lat},${pin.lng},${time}\n`;
+            });
+            const link = document.createElement("a"); link.href = encodeURI(csv);
+            link.download = "SafeZone_Report.csv"; document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
     </script>
 </body>
