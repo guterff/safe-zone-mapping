@@ -158,7 +158,7 @@
 
                 setTimeout(() => {
                     let map = L.map(`m-${key}`, {zoomControl:false, dragging:false, scrollWheelZoom:false}).setView([pin.lat, pin.lng], 15);
-                    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}').addTo(map);
+                    L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { maxZoom: 19, attribution: '© Google Maps' }).addTo(map);
                     L.marker([pin.lat, pin.lng], {icon: icons[pin.status==='pending'?'pending':pin.risk]}).addTo(map);
                 }, 100);
             });

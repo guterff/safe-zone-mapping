@@ -279,7 +279,7 @@
         function closeFormModal() { document.getElementById('formModal').style.display = 'none'; }
 
         const map = L.map('map', { maxBounds: L.latLngBounds([13.94, 100.58], [14.09, 100.90]), minZoom: 11 }).setView([14.0366, 100.7300], 12);
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }).addTo(map);
+        L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { maxZoom: 19, attribution: '© Google Maps' }).addTo(map);
 
         function makeIcon(color) {
             return L.icon({
